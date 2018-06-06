@@ -1,0 +1,103 @@
+<!-- Layout in MainActivity.java -->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <Button
+                android:id="@+id/movies_button"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_movie"
+                android:text="@string/movies" />
+
+            <Button
+                android:id="@+id/tv_button"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_tv"
+                android:text="@string/tv_shows" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="4dp">
+
+            <Button
+                android:id="@+id/favorite_button"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_favorite"
+                android:text="@string/favourites" />
+
+            <Button
+                android:id="@+id/watchlist_button"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_bookmark"
+                android:text="@string/watchlist" />
+
+        </LinearLayout>
+
+        <!-- LAYOUTS MED RECYCLER VIEWS -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.68"
+                android:text="@string/popular_movies"
+                android:textSize="15sp" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_main_movie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.68"
+                android:text="@string/popular_tv"
+                android:textSize="15sp" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_main_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</ScrollView>

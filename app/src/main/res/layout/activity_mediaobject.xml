@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Layout in MediaObjectActivity.java -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Background image -->
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.15"
+        android:scaleType="fitXY" />
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            style="@style/LayoutNoPadding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                style="@style/Layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/media_image"
+                    android:layout_width="150dp"
+                    android:layout_height="250dp"
+                    android:layout_alignParentStart="true"
+                    android:background="@color/colorBlack"
+                    android:padding="1dp"
+                    android:scaleType="fitXY" />
+
+                <ImageButton
+                    android:id="@+id/watch_trailer"
+                    style="@style/ButtonStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="36dp"
+                    android:layout_alignBottom="@id/media_image"
+                    android:layout_alignEnd="@id/media_image"
+                    android:src="@drawable/ic_trailer" />
+
+                <LinearLayout
+                    android:id="@+id/linearLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/media_image"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp">
+
+                    <TextView
+                        android:id="@+id/genre_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/genre" />
+
+                    <TextView
+                        android:id="@+id/genre"
+                        style="@style/SecondaryText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="2dp" />
+
+                    <TextView
+                        android:id="@+id/release_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/release"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/release"
+                        style="@style/SecondaryText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="2dp" />
+
+                    <TextView
+                        android:id="@+id/rating_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/rating" />
+
+
+                    <TextView
+                        android:id="@+id/rating"
+                        style="@style/SecondaryText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/language_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/language" />
+
+                    <TextView
+                        android:id="@+id/language"
+                        style="@style/SecondaryText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="2dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@id/media_image"
+                    android:layout_below="@id/media_image"
+                    android:paddingTop="2dp">
+
+                    <ImageButton
+                        android:id="@+id/add_watchlist"
+                        style="@style/ButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_bookmark" />
+
+                    <ImageButton
+                        android:id="@+id/add_favorite"
+                        style="@style/ButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_favorite" />
+
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/handling_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/buttons"
+                    android:text="@string/plot" />
+
+                <TextView
+                    android:id="@+id/handling"
+                    style="@style/SecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/handling_header"
+                    android:paddingTop="2dp" />
+
+            </RelativeLayout>
+        </RelativeLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

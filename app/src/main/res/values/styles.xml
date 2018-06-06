@@ -1,0 +1,75 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
+        <item name="android:itemBackground">@color/colorBackground</item>
+        <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
+    </style>
+
+    <!-- LAYOUTS -->
+
+    <!-- With padding -->
+    <style name="Layout" parent="AppTheme">
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <!-- Without padding -->
+    <style name="LayoutNoPadding" parent="AppTheme">
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <!-- Recycler Views -->
+    <style name="RecyclerLayout">
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <!-- Card Views -->
+    <style name="CustomCardView" parent="CardView">
+        <item name="android:clickable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="cardCornerRadius">2dp</item>
+        <item name="cardElevation">5dp</item>
+    </style>
+
+    <!-- TabLayout -->
+    <style name="TabLayout" parent="Widget.Design.TabLayout">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="tabTextColor">@color/colorWhite</item>
+        <item name="tabSelectedTextColor">@color/colorAccent</item>
+        <item name="tabGravity">fill</item>
+        <item name="tabMode">fixed</item>
+        <item name="tabMaxWidth">0dp</item>
+    </style>
+
+    <!-- Button style -->
+    <style name="ButtonStyle">
+        <item name="android:background">@drawable/button_click</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
+    <!-- Secondary Text Style -->
+    <style name="SecondaryText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorSecondaryText</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Search View style -->
+    <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textCursorDrawable">@drawable/cursor</item>
+    </style>
+
+
+</resources>

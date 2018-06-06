@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Layout for LoginDialogFragment -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/cancel_button"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="62dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/login_button"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="62dp"
+            android:layout_weight="1"
+            android:text="@string/login" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
+

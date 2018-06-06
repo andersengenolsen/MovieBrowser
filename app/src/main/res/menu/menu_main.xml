@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Elements in Option Menu -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_search_black"
+        android:orderInCategory="1"
+        android:title="@string/search"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/nav_login"
+        android:icon="@drawable/ic_login"
+        android:orderInCategory="2"
+        android:title="@string/login"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/nav_about"
+        android:orderInCategory="2"
+        android:title="@string/about"
+        app:showAsAction="never" />
+</menu>
