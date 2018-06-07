@@ -120,4 +120,8 @@ public class TmdbConstants {
      * JSON media id
      */
     public static final String JSON_MEDIA_ID = "media_id";
+    /**
+     * URL RATING
+     */
+    public static final String RATING = "rating";
 }

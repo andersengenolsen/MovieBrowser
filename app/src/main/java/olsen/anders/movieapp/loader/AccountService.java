@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.model.MediaObject;
 
+import static olsen.anders.movieapp.constants.JsonConstants.VALUE;
+import static olsen.anders.movieapp.constants.TmdbConstants.API_BASE_URL;
 import static olsen.anders.movieapp.constants.TmdbConstants.BASE_URL_ACCOUNT;
 import static olsen.anders.movieapp.constants.TmdbConstants.FAVORITE;
 import static olsen.anders.movieapp.constants.TmdbConstants.JSON_MEDIA_ID;
@@ -26,6 +28,7 @@ import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_MOVIES;
 import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_TV;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_API_KEY;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_SESSION_ID;
+import static olsen.anders.movieapp.constants.TmdbConstants.RATING;
 import static olsen.anders.movieapp.constants.TmdbConstants.WATCHLIST;
 
 
@@ -35,26 +38,8 @@ import static olsen.anders.movieapp.constants.TmdbConstants.WATCHLIST;
  * @author Anders Engen Olsen
  * @see TmdbManager
  */
-public class AccountService {
+public class AccountService extends BaseService {
 
-    /**
-     * API-key
-     */
-    private String apiKey;
-    /**
-     * Activity context
-     */
-    private Context context;
-    /**
-     * Volley RequestQueue
-     */
-    private RequestQueue queue;
-    /**
-     * JsonParser
-     *
-     * @see JsonParser
-     */
-    private JsonParser jsonParser;
     /**
      * Session ID
      */
@@ -73,10 +58,7 @@ public class AccountService {
      * @param apiKey     API-key to TMDB
      */
     AccountService(Context context, RequestQueue queue, JsonParser jsonParser, String apiKey) {
-        this.context = context;
-        this.queue = queue;
-        this.jsonParser = jsonParser;
-        this.apiKey = apiKey;
+        super(context, queue, jsonParser, apiKey);
         session = new TmdbSession(context, queue, jsonParser, apiKey);
     }
 
@@ -85,7 +67,7 @@ public class AccountService {
      *
      * @param mo       MediaObject
      * @param listener TmdbListener
-     * @see #addToList(JSONObject, Uri, TmdbListener)
+     * @see #postJson(JSONObject, Uri, TmdbListener)
      */
     public void addToWatchList(MediaObject mo, boolean status, TmdbListener<String> listener) {
         if (!validateSession(listener))
@@ -106,7 +88,7 @@ public class AccountService {
             return;
         }
 
-        addToList(json, uri, listener);
+        postJson(json, uri, listener);
     }
 
     /**
@@ -114,11 +96,12 @@ public class AccountService {
      *
      * @param mo       MediaObject
      * @param listener TmdbListener
-     * @see #addToList(JSONObject, Uri, TmdbListener)
+     * @see #postJson(JSONObject, Uri, TmdbListener)
      */
     public void addToFavoriteList(MediaObject mo, boolean status, TmdbListener<String> listener) {
         if (!validateSession(listener))
             return;
+
         Uri uri = Uri.parse(BASE_URL_ACCOUNT + FAVORITE).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
                 .appendQueryParameter(PARAM_SESSION_ID, sessionId)
@@ -134,7 +117,7 @@ public class AccountService {
             listener.onError(context.getString(R.string.error_json));
             return;
         }
-        addToList(json, uri, listener);
+        postJson(json, uri, listener);
     }
 
     /**
@@ -244,6 +227,39 @@ public class AccountService {
     }
 
     /**
+     * Adding rating to a mediaobject.
+     *
+     * @param mediaObject movie / tv show to rate
+     * @param rating      the rating, 0.5 - 10
+     * @param listener    listener
+     */
+    public void addRating(MediaObject mediaObject, int rating,
+                          final TmdbListener<String> listener) {
+
+        if (!validateSession(listener))
+            return;
+
+        String mediaType = mediaObject.getType();
+        int mediaId = mediaObject.getId();
+
+        Uri uri = Uri.parse(API_BASE_URL + mediaType + "/" + mediaId + "/" + RATING)
+                .buildUpon()
+                .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_SESSION_ID, sessionId)
+                .build();
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put(VALUE, rating);
+        } catch (JSONException err) {
+            listener.onError(context.getString(R.string.error_json));
+            return;
+        }
+
+        postJson(json, uri, listener);
+    }
+
+    /**
      * public driver-method, checking whether user is logged in
      *
      * @return true if logged in
@@ -258,8 +274,7 @@ public class AccountService {
     /**
      * Validating a session, checking that the user has a session id in shared preferences.
      *
-     * @param listener  TmdbListener, onError() fired if no session id.
-     * @param <AnyType>
+     * @param listener TmdbListener, onError() fired if no session id.
      * @return true if valid session id
      */
     private <AnyType> boolean validateSession(TmdbListener<AnyType> listener) {
@@ -285,55 +300,38 @@ public class AccountService {
 
         String type = (mediaType.equals(MEDIA_TYPE_MOVIE)) ? MEDIA_TYPE_MOVIES : MEDIA_TYPE_TV;
 
-        // Url
         Uri uri = Uri.parse(BASE_URL_ACCOUNT + listType + "/" + type).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
                 .appendQueryParameter(PARAM_SESSION_ID, sessionId)
                 .build();
 
-        // Volley-kall
-        final JsonObjectRequest json = new JsonObjectRequest(
-                Request.Method.GET, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-                listener.onSuccess(jsonParser.parseMediaObjects(response, mediaType));
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                listener.onError(context.getString(R.string.error));
-            }
-        }
-        );
-        queue.add(json);
+        fetchMediaObjects(uri.toString(), listener, mediaType);
     }
 
     /**
-     * Adding a mediaobject to a list at Tmdb
+     * Posting JSON to TMDB
      *
-     * @param listener TmdbListener
-     * @param uri      url
-     * @param jsonPost post-body
+     * @param jsonPost Json to post
+     * @param uri      uri to post to
+     * @param listener listener, fired when call done
      */
-    private void addToList(JSONObject jsonPost, Uri uri, final TmdbListener<String> listener) {
+    private void postJson(JSONObject jsonPost, Uri uri, final TmdbListener<String> listener) {
         JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST,
                 uri.toString(), jsonPost, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
 
-                boolean success = jsonParser.parseListResponse(response);
+                boolean success = jsonParser.parseJsonResponse(response);
 
                 if (success)
-                    listener.onSuccess(context.getString(R.string.updated_list));
+                    listener.onSuccess(context.getString(R.string.done));
                 else
-                    listener.onError(context.getString(R.string.error_adding_list));
+                    listener.onError(context.getString(R.string.error));
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                listener.onError(context.getString(R.string.error_adding_list));
+                listener.onError(context.getString(R.string.error));
             }
         });
         queue.add(postRequest);

@@ -38,5 +38,8 @@
     <string name="already_logged_in">Already logged in</string>
     <string name="video_not_found">Video not found</string>
     <string name="trailer_not_found">Trailer not found</string>
-    <string name="search">SEARCH</string>   
+    <string name="search">SEARCH</string>
+    <string name="added_rating">Added rating</string>
+    <string name="error_rating">Error adding rating</string>
+    <string name="done">Done!</string>
 </resources>

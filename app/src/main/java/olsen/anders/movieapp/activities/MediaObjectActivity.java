@@ -36,6 +36,7 @@ import olsen.anders.movieapp.model.MediaObject;
 
 public class MediaObjectActivity extends BaseActivity implements View.OnClickListener {
 
+    // TODO: Add rating bar!
 
     /**
      * Youtube video ID key
@@ -54,10 +55,6 @@ public class MediaObjectActivity extends BaseActivity implements View.OnClickLis
      * ImageButton favoritelist
      */
     private ImageButton favoriteBtn;
-    /**
-     * ImageButton trailer
-     */
-    private ImageButton trailerBtn;
     /**
      * Flag, watchlist
      */
@@ -198,7 +195,29 @@ public class MediaObjectActivity extends BaseActivity implements View.OnClickLis
             case R.id.watch_trailer:
                 startTrailer();
                 break;
+            case R.id.add_rating:
+                addRating();
+                break;
         }
+    }
+
+    /**
+     * Adding rating to the current mediaobject.
+     *
+     * @see olsen.anders.movieapp.loader.AccountService#addRating(MediaObject, int, TmdbListener)
+     */
+    private void addRating() {
+        accountService.addRating(mediaObject, 10, new TmdbListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                showToast(result);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
     }
 
     /**
@@ -294,10 +313,10 @@ public class MediaObjectActivity extends BaseActivity implements View.OnClickLis
     private void initViews(MediaObject mediaObject) {
         watchlistBtn = findViewById(R.id.add_watchlist);
         favoriteBtn = findViewById(R.id.add_favorite);
-        trailerBtn = findViewById(R.id.watch_trailer);
         watchlistBtn.setOnClickListener(this);
         favoriteBtn.setOnClickListener(this);
-        trailerBtn.setOnClickListener(this);
+        findViewById(R.id.watch_trailer).setOnClickListener(this);
+        findViewById(R.id.add_rating).setOnClickListener(this);
 
         ImageView logoImg = findViewById(R.id.media_image);
         ImageView bgImg = findViewById(R.id.background);

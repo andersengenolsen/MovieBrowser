@@ -98,8 +98,6 @@ class JsonParser {
                     mediaType = type;
                 }
 
-                // TODO: NOT FETCHING MOVIES FROM SEARCH!
-
                 // Getting correct fields, whether movie / tv.
                 // Can also be company, person etc. Skipping if so.
                 if (mediaType.equals(MEDIA_TYPE_MOVIE)) {
@@ -241,7 +239,7 @@ class JsonParser {
      * @param json json
      * @return true if valid response
      */
-    boolean parseListResponse(JSONObject json) {
+    boolean parseJsonResponse(JSONObject json) {
         try {
             return json.getInt(STATUS_CODE) == STATUS_CODE_UPDATED ||
                     json.getInt(STATUS_CODE) == STATUS_CODE_CREATED ||
