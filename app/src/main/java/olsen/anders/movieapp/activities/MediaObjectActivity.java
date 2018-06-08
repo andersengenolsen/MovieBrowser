@@ -13,30 +13,25 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
 import olsen.anders.movieapp.R;
+import olsen.anders.movieapp.fragment.RatingDialogFragment;
 import olsen.anders.movieapp.fragment.YoutubeFragment;
+import olsen.anders.movieapp.listener.RatingDialogListener;
 import olsen.anders.movieapp.loader.BaseMovieTvService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
 
 /**
- * Aktivitet som viser informasjon om ett enkelt MediaObject.
- * Aktivitet kan entres fra forskjellige andre aktiviteter i Appen, og har derfor ingen fast parent.
+ * Activity containing information about a single MediaObject.
+ * The activity can be launched from several other activities, thus no parent.
  * <p>
- * Metoden tar alltid inn et intent som skal inneholde et MediaObject.
- * <p>
- * Ettersom aktiviteten ikke har noen fast parent, har jeg implementert at den simpelthen går
- * tilbake til forrige aktivitet ved trykk på Up-navigation.
- * Vurderer å bruke en stack isteden..
- * <p>
- * I metodens onCreate skal et MediaObject mottas, med key: BaseActivity.MEDIA_OBJECT_KEY
+ * The MediaObject is fetched in the onCreate, by key: BaseActivtiy.MEDIA_OBJECT_KEY
  *
  * @author Anders Engen Olsen
  * @see MediaObject
  */
 
-public class MediaObjectActivity extends BaseActivity implements View.OnClickListener {
-
-    // TODO: Add rating bar!
+public class MediaObjectActivity extends BaseActivity
+        implements View.OnClickListener, RatingDialogListener {
 
     /**
      * Youtube video ID key
@@ -135,6 +130,28 @@ public class MediaObjectActivity extends BaseActivity implements View.OnClickLis
     }
 
     /**
+     * Implementation of RatingDialogListener
+     * Adding rating to the current mediaobject
+     *
+     * @param rating the rating to add
+     * @see olsen.anders.movieapp.loader.AccountService#addRating(MediaObject, int, TmdbListener)
+     */
+    @Override
+    public void onDialogPositiveClick(int rating) {
+        accountService.addRating(mediaObject, rating, new TmdbListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                showToast(result);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
+    }
+
+    /**
      * Changing the color of the the button.
      * DKGRAY indicating the mediaobject is in a list.
      * BLUE indication the mediaobject is not in a list.
@@ -196,28 +213,21 @@ public class MediaObjectActivity extends BaseActivity implements View.OnClickLis
                 startTrailer();
                 break;
             case R.id.add_rating:
-                addRating();
+                showRatingDialog();
                 break;
         }
     }
 
     /**
-     * Adding rating to the current mediaobject.
+     * Showing a RatingDialogFragment.
+     * <p>
+     * The rating given by the user is handled in the interface method onDialogPositiveClick.
      *
-     * @see olsen.anders.movieapp.loader.AccountService#addRating(MediaObject, int, TmdbListener)
+     * @see #onDialogPositiveClick(int)
      */
-    private void addRating() {
-        accountService.addRating(mediaObject, 10, new TmdbListener<String>() {
-            @Override
-            public void onSuccess(String result) {
-                showToast(result);
-            }
-
-            @Override
-            public void onError(String result) {
-                showToast(result);
-            }
-        });
+    private void showRatingDialog() {
+        RatingDialogFragment dialogFragment = new RatingDialogFragment();
+        dialogFragment.show(getSupportFragmentManager(), "RatingDialog");
     }
 
     /**

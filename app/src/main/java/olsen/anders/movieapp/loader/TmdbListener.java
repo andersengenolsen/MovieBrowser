@@ -21,5 +21,4 @@ public interface TmdbListener<AnyType> {
      * @param result Tmdb result
      */
     void onError(String result);
-
 }

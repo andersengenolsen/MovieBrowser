@@ -60,6 +60,12 @@
         <item name="android:textColor">@color/colorWhite</item>
     </style>
 
+    <!-- HeaderText Style -->
+    <style name="HeaderText" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorPrimaryText</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <!-- Secondary Text Style -->
     <style name="SecondaryText" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/colorSecondaryText</item>
