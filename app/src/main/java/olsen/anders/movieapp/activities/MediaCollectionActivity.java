@@ -17,9 +17,9 @@ import olsen.anders.movieapp.adapter.RecyclerMediaListAdapter;
 import olsen.anders.movieapp.adapter.RecyclerStringListAdapter;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.fragment.RecyclerStringListFragment;
+import olsen.anders.movieapp.listener.ListFragmentListener;
 import olsen.anders.movieapp.loader.BaseMovieTvService;
 import olsen.anders.movieapp.loader.TmdbListener;
-import olsen.anders.movieapp.loader.TmdbManager;
 import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -36,7 +36,7 @@ import olsen.anders.movieapp.model.MediaObject;
  */
 
 public class MediaCollectionActivity extends BaseActivity implements
-        RecyclerMediaListFragment.OnItemClickedListener {
+        ListFragmentListener {
 
     /**
      * The tabs with mediaobjects
@@ -71,6 +71,11 @@ public class MediaCollectionActivity extends BaseActivity implements
     private MainPagerAdapter mainPagerAdapter;
 
     /**
+     * Chosen genre in genre tab
+     */
+    private Genre chosenGenre;
+
+    /**
      * Implementation of click event in the RecyclerMediaListFragment.
      * Method called when a mediaobject has been clicked in the list,
      * starting MediaObjectActivity.
@@ -98,32 +103,37 @@ public class MediaCollectionActivity extends BaseActivity implements
             RecyclerStringListAdapter rAdapter = (RecyclerStringListAdapter) adapter;
             String genreString = rAdapter.getElement(position);
 
-            Genre genre = null;
             // Finding correct genre to pass to service
             for (Genre g : genreList) {
                 if (genreString.equalsIgnoreCase(g.getGenre())) {
-                    genre = g;
+                    chosenGenre = g;
                     break;
                 }
             }
 
-            if (genre == null) {
+            if (chosenGenre == null) {
                 showToast(getString(R.string.no_genres));
                 return;
             }
 
-            service.getByGenre(genre, new TmdbListener<ArrayList<MediaObject>>() {
-                @Override
-                public void onSuccess(ArrayList<MediaObject> result) {
-                    genreMediaTab.setContent(result);
-                    genreTab.showChildFragment(genreMediaTab);
-                }
+            loadGenreMediaFromApi(1, chosenGenre);
+        }
+    }
 
-                @Override
-                public void onError(String result) {
-                    showToast(result);
-                }
-            });
+    /**
+     * Loading from API on scroll end
+     *
+     * @param page     page in api
+     * @param fragment fragment to load into
+     */
+    @Override
+    public void onScrollEnd(int page, Fragment fragment) {
+        if (fragment == topRatedTab) {
+            loadTopRatedFromApi(++page);
+        } else if (fragment == upcomingTab) {
+            loadUpcomingFromApi(++page);
+        } else if (fragment == genreMediaTab) {
+            loadGenreMediaFromApi(++page, chosenGenre);
         }
     }
 
@@ -140,8 +150,8 @@ public class MediaCollectionActivity extends BaseActivity implements
         topRatedTab = new RecyclerMediaListFragment();
         upcomingTab = new RecyclerMediaListFragment();
         genreMediaTab = new RecyclerMediaListFragment();
-
         genreTab = new RecyclerStringListFragment();
+
         genreList = new ArrayList<>();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -158,14 +168,60 @@ public class MediaCollectionActivity extends BaseActivity implements
                 service = movieService;
                 setTitle(R.string.movies);
             }
-            fetchMediaObjects();
             fetchGenres();
         } else {
             if (savedInstanceState != null)
                 setTitle(savedInstanceState.getString(MEDIA_TYPE_KEY));
         }
 
+        loadUpcomingFromApi(1);
+        loadTopRatedFromApi(1);
+
         setUpTabLayout();
+    }
+
+    private void loadTopRatedFromApi(int page) {
+        service.getTopRated(page, new TmdbListener<ArrayList<MediaObject>>() {
+            @Override
+            public void onSuccess(ArrayList<MediaObject> result) {
+                topRatedTab.setContent(result);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
+    }
+
+    private void loadUpcomingFromApi(int page) {
+        service.getUpcoming(page, new TmdbListener<ArrayList<MediaObject>>() {
+            @Override
+            public void onSuccess(ArrayList<MediaObject> result) {
+                upcomingTab.setContent(result);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
+    }
+
+    private void loadGenreMediaFromApi(final int page, Genre genre) {
+        service.getByGenre(page, genre, new TmdbListener<ArrayList<MediaObject>>() {
+            @Override
+            public void onSuccess(ArrayList<MediaObject> result) {
+                genreMediaTab.setContent(result);
+                if (page == 1)
+                    genreTab.showChildFragment(genreMediaTab);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
     }
 
     /**
@@ -192,38 +248,6 @@ public class MediaCollectionActivity extends BaseActivity implements
                     genreStrings.add(g.getGenre());
 
                 genreTab.setContent(genreStrings);
-            }
-
-            @Override
-            public void onError(String result) {
-                showToast(result);
-            }
-        });
-
-    }
-
-    /**
-     * Fetching MediaObjects from the TMDB-API.
-     *
-     * @see TmdbManager
-     */
-    private void fetchMediaObjects() {
-        service.getUpcoming(new TmdbListener<ArrayList<MediaObject>>() {
-            @Override
-            public void onSuccess(ArrayList<MediaObject> result) {
-                upcomingTab.setContent(result);
-            }
-
-            @Override
-            public void onError(String result) {
-                showToast(result);
-            }
-        });
-
-        service.getTopRated(new TmdbListener<ArrayList<MediaObject>>() {
-            @Override
-            public void onSuccess(ArrayList<MediaObject> result) {
-                topRatedTab.setContent(result);
             }
 
             @Override

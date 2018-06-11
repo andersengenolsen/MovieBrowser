@@ -71,6 +71,10 @@ public class TmdbConstants {
      */
     public static final String PARAM_SORT_BY = "sort_by";
     /**
+     * Pagination
+     */
+    public static final String PARAM_PAGE = "page";
+    /**
      * Descending popularity sorting
      */
     public static final String POPULARITY_DESC = "popularity.desc";

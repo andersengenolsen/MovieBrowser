@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.MainPagerAdapter;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
+import olsen.anders.movieapp.listener.ListFragmentListener;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.loader.TmdbManager;
 import olsen.anders.movieapp.model.MediaObject;
@@ -29,7 +31,7 @@ import olsen.anders.movieapp.model.MediaObject;
  */
 
 public class ListActivity extends BaseActivity implements
-        RecyclerMediaListFragment.OnItemClickedListener {
+        ListFragmentListener {
 
     /**
      * Representing an unitialized key
@@ -74,6 +76,11 @@ public class ListActivity extends BaseActivity implements
         intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
 
         startActivity(intent);
+    }
+
+    @Override
+    public void onScrollEnd(int page, Fragment fragment) {
+
     }
 
     /**

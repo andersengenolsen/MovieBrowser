@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Layout RecyclerMediaListFragment2ment -->
+<!-- Layout RecyclerMediaListFragment -->
 
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/CustomCardView">

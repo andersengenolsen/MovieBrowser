@@ -23,7 +23,7 @@ import olsen.anders.movieapp.model.MediaObject;
  * @see RecyclerAdapter
  * @see olsen.anders.movieapp.activities.MainActivity
  */
-public class RecyclerImageAdapter extends RecyclerAdapter {
+public class RecyclerImageAdapter extends RecyclerAdapter<MediaObject> {
 
     /**
      * Constructor.

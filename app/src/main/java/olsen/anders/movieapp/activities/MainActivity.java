@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -12,7 +13,9 @@ import java.util.ArrayList;
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
 import olsen.anders.movieapp.adapter.RecyclerImageAdapter;
+import olsen.anders.movieapp.listener.EndlessRecyclerViewScrollListener;
 import olsen.anders.movieapp.listener.RecyclerClickListener;
+import olsen.anders.movieapp.loader.BaseMovieTvService;
 import olsen.anders.movieapp.loader.MovieService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.loader.TvService;
@@ -37,13 +40,33 @@ public class MainActivity extends BaseActivity
      * ArrayList with tv shows for recyclerviews.
      */
     private ArrayList<MediaObject> tvList = new ArrayList<>();
+    /**
+     * MovieAdapter for movies recycler view
+     */
+    private RecyclerImageAdapter movieAdapter;
+    /**
+     * TVAdapter for tv recycler view
+     */
+    private RecyclerImageAdapter tvAdapter;
+    /**
+     * RecyclerViews
+     */
+    private RecyclerView moviesRecyclerView, tvRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addContentView(R.layout.activity_main);
 
-        setUpRecyclers();
+        moviesList = new ArrayList<>();
+        tvList = new ArrayList<>();
+        moviesRecyclerView = findViewById(R.id.recycler_main_movie);
+        tvRecyclerView = findViewById(R.id.recycler_main_tv);
+        movieAdapter = new RecyclerImageAdapter(this, moviesList);
+        tvAdapter = new RecyclerImageAdapter(this, tvList);
+
+        setUpRecyclers(movieAdapter, moviesRecyclerView, movieService);
+        setUpRecyclers(tvAdapter, tvRecyclerView, tvService);
         setUpButtons();
     }
 
@@ -92,50 +115,51 @@ public class MainActivity extends BaseActivity
      *
      * @see RecyclerImageAdapter
      * @see #setRecyclerListener(RecyclerView)
-     * @see MovieService#getPopular(TmdbListener)
-     * @see TvService#getPopular(TmdbListener)
+     * @see MovieService#getPopular(int, TmdbListener)
+     * @see TvService#getPopular(int, TmdbListener)
      */
-    private void setUpRecyclers() {
+    private void setUpRecyclers(RecyclerImageAdapter adapter, RecyclerView view,
+                                final BaseMovieTvService service) {
 
-        final RecyclerImageAdapter movieAdapter = new RecyclerImageAdapter(this, moviesList);
-        final RecyclerImageAdapter tvAdapter = new RecyclerImageAdapter(this, tvList);
+        view.setAdapter(adapter);
 
-        final RecyclerView moviesRecyclerView = findViewById(R.id.recycler_main_movie);
-        final RecyclerView tvRecyclerView = findViewById(R.id.recycler_main_tv);
+        LinearLayoutManager layout = new LinearLayoutManager(
+                this, LinearLayoutManager.HORIZONTAL, false);
+        view.setLayoutManager(layout);
 
-        moviesRecyclerView.setAdapter(movieAdapter);
-        tvRecyclerView.setAdapter(tvAdapter);
+        EndlessRecyclerViewScrollListener scrollListenerMovie =
+                new EndlessRecyclerViewScrollListener(layout) {
+                    @Override
+                    public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                        loadNextPage(++page, service);
+                    }
+                };
 
-        moviesRecyclerView.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
-        tvRecyclerView.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
+        setRecyclerListener(view);
 
-        movieService.getPopular(
+        view.addOnScrollListener(scrollListenerMovie);
+        loadNextPage(1, service);
+    }
+
+    private void loadNextPage(int page, BaseMovieTvService service) {
+        final ArrayList<MediaObject> list;
+        final RecyclerImageAdapter adapter;
+
+        if (service instanceof MovieService) {
+            list = moviesList;
+            adapter = movieAdapter;
+        } else {
+            list = tvList;
+            adapter = tvAdapter;
+        }
+
+        service.getPopular(page,
                 new TmdbListener<ArrayList<MediaObject>>() {
                     @Override
                     public void onSuccess(ArrayList<MediaObject> result) {
-                        moviesList = result;
-                        movieAdapter.setContent(result);
-                        movieAdapter.notifyDataSetChanged();
-                        setRecyclerListener(moviesRecyclerView);
-                    }
-
-                    @Override
-                    public void onError(String result) {
-                        showToast(result);
-                    }
-                }
-        );
-
-        tvService.getPopular(
-                new TmdbListener<ArrayList<MediaObject>>() {
-                    @Override
-                    public void onSuccess(ArrayList<MediaObject> result) {
-                        tvList = result;
-                        tvAdapter.setContent(result);
-                        tvAdapter.notifyDataSetChanged();
-                        setRecyclerListener(tvRecyclerView);
+                        list.addAll(result);
+                        adapter.setContent(list);
+                        adapter.notifyDataSetChanged();
                     }
 
                     @Override

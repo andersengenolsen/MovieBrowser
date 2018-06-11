@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
+import olsen.anders.movieapp.listener.ListFragmentListener;
 import olsen.anders.movieapp.listener.RecyclerClickListener;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -29,24 +30,9 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
         implements RecyclerClickListener.OnItemClickListener {
 
     /**
-     * Local interface. Must be implemented in activities. Fired when element in list is clicked.
-     */
-    public interface OnItemClickedListener {
-        void onItemClicked(RecyclerAdapter adapter, int position);
-    }
-
-    /**
-     * Implementation of RecyclerClickListener.OnItemClick
-     */
-    @Override
-    public void onItemClick(RecyclerAdapter adapter, int position) {
-        onItemClicked.onItemClicked(adapter, position);
-    }
-
-    /**
      * Interface
      */
-    protected OnItemClickedListener onItemClicked;
+    protected ListFragmentListener fragmentListener;
 
     /**
      * Orientation change key
@@ -73,12 +59,21 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
         super.onCreate(savedInstanceState);
 
         try {
-            onItemClicked = (OnItemClickedListener) getActivity();
+            fragmentListener = (ListFragmentListener) getActivity();
         } catch (ClassCastException err) {
             throw new ClassCastException(getActivity().getClass().getSimpleName()
                     + " must implement " + RecyclerListFragment.class.getSimpleName());
         }
     }
+
+    /**
+     * Implementation of RecyclerClickListener.OnItemClick
+     */
+    @Override
+    public void onItemClick(RecyclerAdapter adapter, int position) {
+        fragmentListener.onItemClicked(adapter, position);
+    }
+
 
     /**
      * Inflating layout.
@@ -106,10 +101,13 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
      * @param contentList list with content
      */
     public void setContent(ArrayList<AnyType> contentList) {
-        this.contentList = contentList;
+        if (this.contentList == null)
+            this.contentList = new ArrayList<>();
+
+        this.contentList.addAll(contentList);
 
         if (adapter != null) {
-            adapter.setContent(contentList);
+            adapter.setContent(this.contentList);
             adapter.notifyDataSetChanged();
         }
     }

@@ -49,23 +49,24 @@ public abstract class BaseMovieTvService extends BaseService {
     /**
      * Fetching popular movie / tv
      *
+     * @param page     page from api
      * @param listener fired when downloaded
      */
-    public abstract void getPopular(final TmdbListener<ArrayList<MediaObject>> listener);
+    public abstract void getPopular(int page, final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
      * Fetching upcoming movie / tv
      *
      * @param listener fired when downloaded
      */
-    public abstract void getUpcoming(final TmdbListener<ArrayList<MediaObject>> listener);
+    public abstract void getUpcoming(int page, final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
      * Fetching top rated movie / tv
      *
      * @param listener fired when downloaded
      */
-    public abstract void getTopRated(final TmdbListener<ArrayList<MediaObject>> listener);
+    public abstract void getTopRated(int page, final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
      * Downloading all genres.
@@ -80,7 +81,7 @@ public abstract class BaseMovieTvService extends BaseService {
      * @param genre    {@link Genre}
      * @param listener fired when downloaded
      */
-    public abstract void getByGenre(Genre genre,
+    public abstract void getByGenre(int page, Genre genre,
                                     final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**

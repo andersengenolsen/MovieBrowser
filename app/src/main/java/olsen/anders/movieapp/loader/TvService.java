@@ -11,16 +11,15 @@ import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
 import static olsen.anders.movieapp.constants.TmdbConstants.API_BASE_URL;
-import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_MOVIE;
 import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_TV;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_API_KEY;
+import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_PAGE;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_SORT_BY;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_WITH_GENRES;
 import static olsen.anders.movieapp.constants.TmdbConstants.POPULARITY_DESC;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_DISCOVER;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_GENRE;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_LIST;
-import static olsen.anders.movieapp.constants.TmdbConstants.URL_MOVIE;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_ON_THE_AIR;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_POPULAR;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_TOP_RATED;
@@ -49,9 +48,10 @@ public class TvService extends BaseMovieTvService {
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
-    public void getPopular(final TmdbListener<ArrayList<MediaObject>> listener) {
+    public void getPopular(int page, final TmdbListener<ArrayList<MediaObject>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_TV + URL_POPULAR).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .build();
 
         fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_TV);
@@ -64,9 +64,10 @@ public class TvService extends BaseMovieTvService {
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
-    public void getTopRated(final TmdbListener<ArrayList<MediaObject>> listener) {
+    public void getTopRated(int page, final TmdbListener<ArrayList<MediaObject>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_TV + URL_TOP_RATED).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .build();
 
         fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_TV);
@@ -79,9 +80,10 @@ public class TvService extends BaseMovieTvService {
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
-    public void getUpcoming(final TmdbListener<ArrayList<MediaObject>> listener) {
+    public void getUpcoming(int page, final TmdbListener<ArrayList<MediaObject>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_TV + URL_ON_THE_AIR).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .build();
 
         fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_TV);
@@ -108,13 +110,14 @@ public class TvService extends BaseMovieTvService {
      * @param listener fired when downloaded
      */
     @Override
-    public void getByGenre(Genre genre, TmdbListener<ArrayList<MediaObject>> listener) {
+    public void getByGenre(int page, Genre genre, TmdbListener<ArrayList<MediaObject>> listener) {
         int genreId = genre.getId();
 
         Uri uri = Uri.parse(API_BASE_URL + URL_DISCOVER + MEDIA_TYPE_TV)
                 .buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
                 .appendQueryParameter(PARAM_WITH_GENRES, String.valueOf(genreId))
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .appendQueryParameter(PARAM_SORT_BY, POPULARITY_DESC)
                 .build();
 

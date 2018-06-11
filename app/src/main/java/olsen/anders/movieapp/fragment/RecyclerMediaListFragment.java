@@ -2,7 +2,6 @@ package olsen.anders.movieapp.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +12,8 @@ import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.RecyclerMediaListAdapter;
+import olsen.anders.movieapp.listener.EndlessRecyclerViewScrollListener;
+import olsen.anders.movieapp.listener.ListFragmentListener;
 import olsen.anders.movieapp.listener.RecyclerClickListener;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -28,6 +29,11 @@ import olsen.anders.movieapp.model.MediaObject;
  */
 
 public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject> {
+
+    /**
+     * The recyclerview in the layout
+     */
+    private RecyclerView recyclerView;
 
     /**
      * Obtaining bundle with mediaobjects.
@@ -63,10 +69,23 @@ public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject>
      */
     @Override
     protected void setUpRecycler(View v) {
+        if (recyclerView != null)
+            return;
+
         adapter = new RecyclerMediaListAdapter(getActivity(), contentList);
-        RecyclerView recyclerView = v.findViewById(R.id.recycler_list);
+        recyclerView = v.findViewById(R.id.recycler_list);
         recyclerView.addOnItemTouchListener(new RecyclerClickListener(getActivity(), this));
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL, false);
+
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                fragmentListener.onScrollEnd(page, RecyclerMediaListFragment.this);
+            }
+        });
     }
 }

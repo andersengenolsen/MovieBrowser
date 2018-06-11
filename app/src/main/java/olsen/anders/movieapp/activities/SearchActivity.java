@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
 import olsen.anders.movieapp.fragment.RecyclerListFragment;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
+import olsen.anders.movieapp.listener.ListFragmentListener;
 import olsen.anders.movieapp.loader.SearchService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
@@ -23,7 +25,7 @@ import olsen.anders.movieapp.model.MediaObject;
  * @author Anders Engen Olsen
  */
 public class SearchActivity extends BaseActivity
-        implements RecyclerListFragment.OnItemClickedListener {
+        implements ListFragmentListener {
 
     private static final String LOG_TAG = SearchActivity.class.getSimpleName();
 
@@ -116,6 +118,10 @@ public class SearchActivity extends BaseActivity
         startActivity(intent);
     }
 
+    @Override
+    public void onScrollEnd(int page, Fragment fragment) {
+
+    }
 
     /**
      * The activity can be started from several parent activities.
