@@ -7,11 +7,16 @@ import com.android.volley.RequestQueue;
 
 import java.util.ArrayList;
 
+import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
 import static olsen.anders.movieapp.constants.TmdbConstants.API_BASE_URL;
 import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_MOVIE;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_API_KEY;
+import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_SORT_BY;
+import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_WITH_GENRES;
+import static olsen.anders.movieapp.constants.TmdbConstants.POPULARITY_DESC;
+import static olsen.anders.movieapp.constants.TmdbConstants.URL_DISCOVER;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_GENRE;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_LIST;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_MOVIE;
@@ -75,6 +80,20 @@ public class MovieService extends BaseMovieTvService {
     public void getUpcoming(final TmdbListener<ArrayList<MediaObject>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_MOVIE + URL_UPCOMING).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .build();
+
+        fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_MOVIE);
+    }
+
+    @Override
+    public void getByGenre(Genre genre, TmdbListener<ArrayList<MediaObject>> listener) {
+        int genreId = genre.getId();
+
+        Uri uri = Uri.parse(API_BASE_URL + URL_DISCOVER + URL_MOVIE)
+                .buildUpon()
+                .appendQueryParameter(PARAM_API_KEY, apiKey)
+                //.appendQueryParameter(PARAM_SORT_BY, POPULARITY_DESC)
+                .appendQueryParameter(PARAM_WITH_GENRES, String.valueOf(genreId))
                 .build();
 
         fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_MOVIE);

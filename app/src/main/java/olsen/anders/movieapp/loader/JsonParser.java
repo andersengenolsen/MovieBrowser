@@ -145,11 +145,8 @@ class JsonParser {
                 mediaObjects.add(movie);
             }
         } catch (JSONException err) {
-            Log.d(LOG_TAG, err.toString());
             Toast.makeText(context, context.getString(R.string.error_json), Toast.LENGTH_SHORT).show();
         }
-        for (MediaObject m : mediaObjects)
-            Log.d(LOG_TAG, m.getTitle());
         return mediaObjects;
     }
 

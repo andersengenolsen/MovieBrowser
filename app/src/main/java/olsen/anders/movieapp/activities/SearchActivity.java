@@ -8,7 +8,9 @@ import android.view.MenuItem;
 
 import java.util.ArrayList;
 
+import olsen.anders.movieapp.adapter.RecyclerAdapter;
 import olsen.anders.movieapp.fragment.RecyclerListFragment;
+import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.loader.SearchService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
@@ -16,7 +18,7 @@ import olsen.anders.movieapp.model.MediaObject;
 /**
  * Activity showing search results, when user searches for movie / tv through Options Menu.
  * <p>
- * The activity contains a RecyclerListFragment with MediaObjects.
+ * The activity contains a RecyclerMediaListFragment with MediaObjects.
  *
  * @author Anders Engen Olsen
  */
@@ -31,9 +33,9 @@ public class SearchActivity extends BaseActivity
     private SearchService searchService;
 
     /**
-     * @see RecyclerListFragment
+     * @see RecyclerMediaListFragment
      */
-    private RecyclerListFragment searchResults;
+    private RecyclerMediaListFragment searchResults;
 
     /**
      * Getting query from calling activity.
@@ -48,7 +50,7 @@ public class SearchActivity extends BaseActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         searchService = tmdb.getSearchService();
-        searchResults = new RecyclerListFragment();
+        searchResults = new RecyclerMediaListFragment();
 
         handleIntent(getIntent());
     }
@@ -64,14 +66,14 @@ public class SearchActivity extends BaseActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         searchService = tmdb.getSearchService();
-        searchResults = new RecyclerListFragment();
+        searchResults = new RecyclerMediaListFragment();
         handleIntent(intent);
     }
 
     /**
      * Receiving query from the search view in the calling activity.
      * <p>
-     * Updating the content in the list, placing the searchresults in the RecyclerListFragment.
+     * Updating the content in the list, placing the searchresults in the RecyclerMediaListFragment.
      */
     private void handleIntent(Intent intent) {
 
@@ -85,7 +87,7 @@ public class SearchActivity extends BaseActivity
                         new TmdbListener<ArrayList<MediaObject>>() {
                             @Override
                             public void onSuccess(ArrayList<MediaObject> result) {
-                                searchResults.setMediaObjects(result);
+                                searchResults.setContent(result);
                                 addFragmentToLayout(searchResults, "SearchResults");
                             }
 
@@ -99,18 +101,18 @@ public class SearchActivity extends BaseActivity
     }
 
     /**
-     * Implementation of click event in the RecyclerListFragment.
+     * Implementation of click event in the RecyclerMediaListFragment.
      * Method called when a mediaobject has been clicked in the list,
      * starting MediaObjectActivity.
      *
-     * @param mediaObject item clicked
      * @see MediaObjectActivity
      */
     @Override
-    public void onItemClicked(MediaObject mediaObject) {
+    public void onItemClicked(RecyclerAdapter adapter, int position) {
+        MediaObject mediaObject = (MediaObject) adapter.getElement(position);
+
         Intent intent = new Intent(this, MediaObjectActivity.class);
         intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
-
         startActivity(intent);
     }
 

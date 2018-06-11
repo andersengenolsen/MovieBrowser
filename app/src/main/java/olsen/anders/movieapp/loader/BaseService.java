@@ -1,6 +1,7 @@
 package olsen.anders.movieapp.loader;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -72,6 +73,7 @@ public abstract class BaseService {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.d("Base", error.getMessage());
                 listener.onError(context.getString(R.string.error));
             }
         }

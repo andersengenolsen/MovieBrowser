@@ -1,11 +1,9 @@
 package olsen.anders.movieapp.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +12,8 @@ import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
-import olsen.anders.movieapp.adapter.RecyclerMediaListAdapter;
 import olsen.anders.movieapp.listener.RecyclerClickListener;
 import olsen.anders.movieapp.model.MediaObject;
-
 
 /**
  * Fragment which show a list of MediaObjects in RecyclerViews.
@@ -25,47 +21,47 @@ import olsen.anders.movieapp.model.MediaObject;
  * with key MEDIA_OBJECT_LIST_KEY.
  *
  * @author Anders Engen Olsen
- * @see RecyclerMediaListAdapter
- * @see RecyclerClickListener
+ * @see olsen.anders.movieapp.adapter.RecyclerMediaListAdapter
+ * @see olsen.anders.movieapp.listener.RecyclerClickListener
  */
 
-public class RecyclerListFragment extends Fragment
+public abstract class RecyclerListFragment<AnyType> extends Fragment
         implements RecyclerClickListener.OnItemClickListener {
 
     /**
      * Local interface. Must be implemented in activities. Fired when element in list is clicked.
      */
     public interface OnItemClickedListener {
-        void onItemClicked(MediaObject mediaObject);
+        void onItemClicked(RecyclerAdapter adapter, int position);
     }
-
-    /**
-     * Orientation change key
-     */
-    private final String MEDIA_OBJECTS = "media_objects";
-
-    /**
-     * Interface
-     */
-    private OnItemClickedListener onItemClicked;
-
-    /**
-     * ArrayList with mediaobjects
-     */
-    private ArrayList<MediaObject> mediaObjects;
-
-    /**
-     * Custom adapter for the recyclerviews
-     */
-    private RecyclerMediaListAdapter adapter;
 
     /**
      * Implementation of RecyclerClickListener.OnItemClick
      */
     @Override
     public void onItemClick(RecyclerAdapter adapter, int position) {
-        onItemClicked.onItemClicked((MediaObject) adapter.getElement(position));
+        onItemClicked.onItemClicked(adapter, position);
     }
+
+    /**
+     * Interface
+     */
+    protected OnItemClickedListener onItemClicked;
+
+    /**
+     * Orientation change key
+     */
+    protected final String CONTENT_KEY = "content";
+
+    /**
+     * ArrayList with content in list
+     */
+    protected ArrayList<AnyType> contentList;
+
+    /**
+     * The adapter.
+     */
+    protected RecyclerAdapter adapter;
 
     /**
      * Activites must implement the local interface
@@ -85,29 +81,14 @@ public class RecyclerListFragment extends Fragment
     }
 
     /**
-     * Obtaining bundle with mediaobjects.
-     *
-     * @see #setUpRecycler(View)
+     * Inflating layout.
      */
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        if (savedInstanceState != null) {
-            mediaObjects = savedInstanceState.getParcelableArrayList(MEDIA_OBJECTS);
-        } else if (mediaObjects == null) {
-            mediaObjects = new ArrayList<>();
-        }
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         setUpRecycler(view);
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(MEDIA_OBJECTS, mediaObjects);
     }
 
     /**
@@ -117,27 +98,18 @@ public class RecyclerListFragment extends Fragment
      * @see RecyclerClickListener
      * @see MediaObject
      */
-    private void setUpRecycler(View v) {
-
-        adapter = new RecyclerMediaListAdapter(getActivity(), mediaObjects);
-
-        RecyclerView recyclerView = v.findViewById(R.id.recycler_list);
-
-        recyclerView.addOnItemTouchListener(new RecyclerClickListener(getActivity(), this));
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-    }
+    protected abstract void setUpRecycler(View v);
 
     /**
-     * Updating the list with mediaobjects
+     * Updating the list with content
      *
-     * @param mediaObjects list with mediaobjects
+     * @param contentList list with content
      */
-    public void setMediaObjects(ArrayList<MediaObject> mediaObjects) {
-        this.mediaObjects = mediaObjects;
+    public void setContent(ArrayList<AnyType> contentList) {
+        this.contentList = contentList;
 
         if (adapter != null) {
-            adapter.setContent(mediaObjects);
+            adapter.setContent(contentList);
             adapter.notifyDataSetChanged();
         }
     }

@@ -2,6 +2,7 @@ package olsen.anders.movieapp.loader;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
+import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
 /**
@@ -44,12 +46,35 @@ public abstract class BaseMovieTvService extends BaseService {
      */
     public abstract void getTrailerUrl(int mediaId, TmdbListener<String> listener);
 
+    /**
+     * Fetching popular movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getPopular(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Fetching upcoming movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getUpcoming(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Fetching top rated movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getTopRated(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Fetching by genre
+     *
+     * @param genre    {@link Genre}
+     * @param listener fired when downloaded
+     */
+    public abstract void getByGenre(Genre genre,
+                                    final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
      * Downloading JSON containing genres

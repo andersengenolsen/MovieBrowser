@@ -4,17 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.MainPagerAdapter;
-import olsen.anders.movieapp.fragment.RecyclerListFragment;
+import olsen.anders.movieapp.adapter.RecyclerAdapter;
+import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.loader.TmdbManager;
 import olsen.anders.movieapp.model.MediaObject;
@@ -28,11 +25,11 @@ import olsen.anders.movieapp.model.MediaObject;
  * In each tab, it is displayed a FragmentList with RecyclerViews.
  *
  * @author Anders Engen Olsen
- * @see RecyclerListFragment
+ * @see RecyclerMediaListFragment
  */
 
 public class ListActivity extends BaseActivity implements
-        RecyclerListFragment.OnItemClickedListener {
+        RecyclerMediaListFragment.OnItemClickedListener {
 
     /**
      * Representing an unitialized key
@@ -41,11 +38,11 @@ public class ListActivity extends BaseActivity implements
     /**
      * Movie tab
      */
-    private RecyclerListFragment movieTab;
+    private RecyclerMediaListFragment movieTab;
     /**
      * URL_TV tab
      */
-    private RecyclerListFragment tvTab;
+    private RecyclerMediaListFragment tvTab;
     /**
      * Mediaobjects for the Movie tab
      */
@@ -62,16 +59,17 @@ public class ListActivity extends BaseActivity implements
     private int type;
 
     /**
-     * Implementation of RecyclerListFragment.OnItemClickedListener.
+     * Implementation of RecyclerMediaListFragment.OnItemClickedListener.
      * <p>
      * If an item in the list is clicked, the MediaObjectActivity is started.
      *
-     * @param mediaObject
-     * @see RecyclerListFragment.OnItemClickedListener
+     * @see RecyclerMediaListFragment.OnItemClickedListener
      * @see MediaObjectActivity
      */
     @Override
-    public void onItemClicked(MediaObject mediaObject) {
+    public void onItemClicked(RecyclerAdapter adapter, int pos) {
+        MediaObject mediaObject = (MediaObject) adapter.getElement(pos);
+
         Intent intent = new Intent(this, MediaObjectActivity.class);
         intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
 
@@ -119,8 +117,8 @@ public class ListActivity extends BaseActivity implements
         addContentView(R.layout.activity_tablayout);
 
         // Tabs
-        movieTab = new RecyclerListFragment();
-        tvTab = new RecyclerListFragment();
+        movieTab = new RecyclerMediaListFragment();
+        tvTab = new RecyclerMediaListFragment();
 
         // TabLayout
         setUpTabLayout();
@@ -156,9 +154,9 @@ public class ListActivity extends BaseActivity implements
      * Initializing the tab-layout
      * The tab-layout is used for both movies and URL_TV.
      * The tabs are: Movies | URL_TV shows
-     * The fragment shown in each tab is RecyclerListFragment.
+     * The fragment shown in each tab is RecyclerMediaListFragment.
      *
-     * @see RecyclerListFragment
+     * @see RecyclerMediaListFragment
      */
     private void setUpTabLayout() {
         // Fetching tab-layout.
@@ -218,7 +216,7 @@ public class ListActivity extends BaseActivity implements
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
                     movieList = result;
-                    movieTab.setMediaObjects(movieList);
+                    movieTab.setContent(movieList);
                 }
 
                 @Override
@@ -231,7 +229,7 @@ public class ListActivity extends BaseActivity implements
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
                     tvList = result;
-                    tvTab.setMediaObjects(tvList);
+                    tvTab.setContent(tvList);
                 }
 
                 @Override
@@ -244,7 +242,7 @@ public class ListActivity extends BaseActivity implements
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
                     movieList = result;
-                    movieTab.setMediaObjects(result);
+                    movieTab.setContent(result);
                 }
 
                 @Override
@@ -256,7 +254,7 @@ public class ListActivity extends BaseActivity implements
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
                     tvList = result;
-                    tvTab.setMediaObjects(result);
+                    tvTab.setContent(result);
                 }
 
                 @Override

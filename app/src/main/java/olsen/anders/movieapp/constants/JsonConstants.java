@@ -74,4 +74,5 @@ public class JsonConstants {
      * Status code deleted
      */
     public static int STATUS_CODE_DELETED = 13;
+
 }
