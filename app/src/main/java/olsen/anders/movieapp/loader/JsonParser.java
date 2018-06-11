@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import olsen.anders.movieapp.R;
+import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
 import static olsen.anders.movieapp.activities.BaseActivity.SHARED_PREF_GENRES;
@@ -143,25 +144,25 @@ class JsonParser {
                 mediaObjects.add(movie);
             }
         } catch (JSONException err) {
-            Log.d(LOG_TAG, err.toString());
             Toast.makeText(context, context.getString(R.string.error_json), Toast.LENGTH_SHORT).show();
         }
-        for (MediaObject m : mediaObjects)
-            Log.d(LOG_TAG, m.getTitle());
         return mediaObjects;
     }
 
     /**
      * Processing JSONobject which contains a list of genres.
-     * Genres are saved in SharedPrefs
+     * Genres are saved in SharedPrefs, and also returned as an ArrayList.
      *
      * @param json jsonobject with genres
      */
-    void parseGenres(JSONObject json) {
+    ArrayList<Genre> parseGenres(JSONObject json) {
         // SharedPrefs
         SharedPreferences sharedPreferences =
                 context.getSharedPreferences(SHARED_PREF_GENRES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        // ArrayList
+        ArrayList<Genre> genreList = new ArrayList<>();
 
         try {
             JSONArray jsonArr = json.getJSONArray(GENRES);
@@ -170,16 +171,17 @@ class JsonParser {
 
                 JSONObject object = jsonArr.getJSONObject(i);
 
-                int id = object.getInt(ID);
-                String name = object.getString(NAME);
-
-                editor.putString(String.valueOf(id), name);
+                Genre genre = new Genre(object.getInt(ID), object.getString(NAME));
+                editor.putString(String.valueOf(genre.getId()), genre.getGenre());
+                genreList.add(genre);
             }
         } catch (JSONException err) {
             Toast.makeText(context, context.getString(R.string.error_json), Toast.LENGTH_SHORT).show();
         } finally {
             editor.apply();
         }
+
+        return genreList;
     }
 
     /**

@@ -3,10 +3,20 @@ package olsen.anders.movieapp.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.text.Layout;
+import android.util.Log;
+import android.view.View;
+
+import java.util.Stack;
+
+import olsen.anders.movieapp.R;
 
 /**
  * PagerAdapter, administrating the tabs in the activity.
  * Note that the tabs are actually fragments.
+ * <p>
+ * The fragments can be replaced. Simulating adding to "backstack" by using a stack.
  *
  * @author Anders Engen Olsen
  */
@@ -27,6 +37,7 @@ public class MainPagerAdapter extends FragmentStatePagerAdapter {
         super(manager);
         this.fragments = fragments;
     }
+
 
     /**
      * Returning a fragment, based on which tab the user clicked.

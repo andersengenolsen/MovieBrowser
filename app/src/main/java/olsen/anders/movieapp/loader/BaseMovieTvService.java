@@ -2,6 +2,7 @@ package olsen.anders.movieapp.loader;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
+import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
 /**
@@ -44,12 +46,42 @@ public abstract class BaseMovieTvService extends BaseService {
      */
     public abstract void getTrailerUrl(int mediaId, TmdbListener<String> listener);
 
+    /**
+     * Fetching popular movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getPopular(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Fetching upcoming movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getUpcoming(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Fetching top rated movie / tv
+     *
+     * @param listener fired when downloaded
+     */
     public abstract void getTopRated(final TmdbListener<ArrayList<MediaObject>> listener);
 
+    /**
+     * Downloading all genres.
+     *
+     * @param listener fired when downloaded.
+     */
+    public abstract void getAllGenres(final TmdbListener<ArrayList<Genre>> listener);
+
+    /**
+     * Fetching by genre
+     *
+     * @param genre    {@link Genre}
+     * @param listener fired when downloaded
+     */
+    public abstract void getByGenre(Genre genre,
+                                    final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
      * Downloading JSON containing genres
@@ -57,19 +89,22 @@ public abstract class BaseMovieTvService extends BaseService {
      * @param url url with genres
      * @see JsonParser#parseGenres(JSONObject)
      */
-    void fetchMediaGenres(String url) {
+    void fetchMediaGenres(String url, final TmdbListener<ArrayList<Genre>> listener) {
         // Volley-request
         final JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
-                jsonParser.parseGenres(response);
+                ArrayList<Genre> genres = jsonParser.parseGenres(response);
+                if (listener != null)
+                    listener.onSuccess(genres);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                if (listener != null)
+                    listener.onError(context.getString(R.string.error));
             }
         }
         );
@@ -84,7 +119,6 @@ public abstract class BaseMovieTvService extends BaseService {
      * @throws java.util.NoSuchElementException no trailer url found
      */
     void getTrailerUrl(Uri uri, final TmdbListener<String> listener) {
-
         // Volley-call
         final JsonObjectRequest json = new JsonObjectRequest(
                 Request.Method.GET, uri.toString(),

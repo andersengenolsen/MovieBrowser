@@ -51,6 +51,10 @@ public class TmdbConstants {
      */
     public static final String URL_SEARCH = "search/multi";
     /**
+     * DISCOVER URL
+     */
+    public static final String URL_DISCOVER = "discover/";
+    /**
      * PARAM API KEY
      */
     public static final String PARAM_API_KEY = "api_key";
@@ -59,11 +63,23 @@ public class TmdbConstants {
      */
     public static final String PARAM_QUERY = "query";
     /**
-     * Media type movies, plural
+     * Genre search
+     */
+    public static final String PARAM_WITH_GENRES = "with_genres";
+    /**
+     * Sorting
+     */
+    public static final String PARAM_SORT_BY = "sort_by";
+    /**
+     * Descending popularity sorting
+     */
+    public static final String POPULARITY_DESC = "popularity.desc";
+    /**
+     * Media type movie
      */
     public final static String MEDIA_TYPE_MOVIE = "movie";
     /**
-     * Media type movie
+     * Media type movies
      */
     public final static String MEDIA_TYPE_MOVIES = "movies";
     /**

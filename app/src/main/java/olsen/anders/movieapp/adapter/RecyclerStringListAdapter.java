@@ -5,36 +5,33 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
-import olsen.anders.movieapp.model.MediaObject;
+import olsen.anders.movieapp.model.Genre;
 
 
 /**
- * Custom adapter for RecyclerView, with inner class for the ViewHolder in the Adapter.
- * Used whenever a list of mediaobjects is shown.
+ * Custom adapter for RecyclerView with Strings, with inner class for the ViewHolder in the Adapter.
+ * Used whenever a list of Strings is shown.
  *
  * @author Anders Engen Olsen
  * @see RecyclerAdapter
  * @see olsen.anders.movieapp.activities.MainActivity
  */
 
-public class RecyclerMediaListAdapter extends RecyclerAdapter<MediaObject> {
+public class RecyclerStringListAdapter extends RecyclerAdapter<String> {
 
     /**
      * Constructor.
      *
-     * @param context      Activity context
-     * @param mediaObjects ArrayList with mediaobjects
+     * @param context Activity context
+     * @param content ArrayList with String content in list
      */
-    public RecyclerMediaListAdapter(Context context, ArrayList<MediaObject> mediaObjects) {
-        super(context, mediaObjects);
+    public RecyclerStringListAdapter(Context context, ArrayList<String> content) {
+        super(context, content);
     }
 
     /**
@@ -46,7 +43,7 @@ public class RecyclerMediaListAdapter extends RecyclerAdapter<MediaObject> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.recycler_list_media_item, parent, false);
+        View view = inflater.inflate(R.layout.recycler_list_string_item, parent, false);
 
         return new RecyclerListHolder(view);
     }
@@ -60,16 +57,8 @@ public class RecyclerMediaListAdapter extends RecyclerAdapter<MediaObject> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         RecyclerListHolder recyclerListHolder = (RecyclerListHolder) holder;
-
-        MediaObject mediaObject = (MediaObject) content.get(position);
-
-        recyclerListHolder.title.setText(mediaObject.getTitle());
-        recyclerListHolder.genre.setText(mediaObject.getGenre());
-
-        Picasso.with(context).load(mediaObject.getImagePath())
-                .error(R.drawable.ic_movie_black)
-                .placeholder(R.drawable.ic_movie_black)
-                .into(recyclerListHolder.poster);
+        String entry = content.get(position);
+        recyclerListHolder.entry.setText(entry);
     }
 
     /**
@@ -77,19 +66,14 @@ public class RecyclerMediaListAdapter extends RecyclerAdapter<MediaObject> {
      */
     private class RecyclerListHolder extends RecyclerView.ViewHolder {
 
-        private ImageView poster;
-        private TextView title;
-        private TextView genre;
+        private TextView entry;
 
         /**
          * @param view Root
          */
         private RecyclerListHolder(View view) {
             super(view);
-
-            poster = view.findViewById(R.id.poster);
-            title = view.findViewById(R.id.title);
-            genre = view.findViewById(R.id.genre);
+            entry = view.findViewById(R.id.entry);
         }
     }
 }

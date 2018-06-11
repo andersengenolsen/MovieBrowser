@@ -5,12 +5,12 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -25,17 +25,20 @@ import android.widget.FrameLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.fragment.LoginDialogFragment;
-import olsen.anders.movieapp.fragment.RecyclerListFragment;
+import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.listener.LoginDialogListener;
 import olsen.anders.movieapp.loader.AccountService;
 import olsen.anders.movieapp.loader.MovieService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.loader.TmdbManager;
 import olsen.anders.movieapp.loader.TvService;
+import olsen.anders.movieapp.model.Genre;
 
 
 /**
@@ -124,8 +127,8 @@ public class BaseActivity extends AppCompatActivity
 
         // Fetching genres.
         if (!tmdb.hasGenres()) {
-            movieService.downloadMovieGenres();
-            tvService.downloadTVGenres();
+            movieService.getAllGenres(null);
+            tvService.getAllGenres(null);
         }
 
         setContentView(R.layout.activity_base);
@@ -277,11 +280,21 @@ public class BaseActivity extends AppCompatActivity
      *
      * @param fragment fragment to add
      */
-    protected void addFragmentToLayout(RecyclerListFragment fragment, String tag) {
+    protected void addFragmentToLayout(RecyclerMediaListFragment fragment, String tag) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = manager.beginTransaction();
         fragmentTransaction.replace(frameLayout.getId(), fragment, tag);
         fragmentTransaction.commit();
+    }
+
+    /**
+     * Returning all genres if downloaded
+     */
+    protected Map<String, ?> getGenres() {
+        // Map with genres from Shared Prefs
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREF_GENRES,
+                Context.MODE_PRIVATE);
+        return prefs.getAll();
     }
 
     /**

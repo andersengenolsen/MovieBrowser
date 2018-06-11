@@ -1,6 +1,7 @@
 package olsen.anders.movieapp.loader;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -25,7 +26,7 @@ public abstract class BaseService {
     /**
      * RequestQueue Volley-library
      */
-    RequestQueue queue;
+    protected RequestQueue queue;
     /**
      * Activity context
      */
@@ -33,11 +34,11 @@ public abstract class BaseService {
     /**
      * @see JsonParser
      */
-    JsonParser jsonParser;
+    protected JsonParser jsonParser;
     /**
      * API KEY
      */
-    String apiKey;
+    protected String apiKey;
 
     /**
      * Constructor.
