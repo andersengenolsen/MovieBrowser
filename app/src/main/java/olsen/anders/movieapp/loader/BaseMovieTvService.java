@@ -68,6 +68,13 @@ public abstract class BaseMovieTvService extends BaseService {
     public abstract void getTopRated(final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
+     * Downloading all genres.
+     *
+     * @param listener fired when downloaded.
+     */
+    public abstract void getAllGenres(final TmdbListener<ArrayList<Genre>> listener);
+
+    /**
      * Fetching by genre
      *
      * @param genre    {@link Genre}
@@ -82,19 +89,22 @@ public abstract class BaseMovieTvService extends BaseService {
      * @param url url with genres
      * @see JsonParser#parseGenres(JSONObject)
      */
-    void fetchMediaGenres(String url) {
+    void fetchMediaGenres(String url, final TmdbListener<ArrayList<Genre>> listener) {
         // Volley-request
         final JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
-                jsonParser.parseGenres(response);
+                ArrayList<Genre> genres = jsonParser.parseGenres(response);
+                if (listener != null)
+                    listener.onSuccess(genres);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                if (listener != null)
+                    listener.onError(context.getString(R.string.error));
             }
         }
         );
@@ -109,7 +119,6 @@ public abstract class BaseMovieTvService extends BaseService {
      * @throws java.util.NoSuchElementException no trailer url found
      */
     void getTrailerUrl(Uri uri, final TmdbListener<String> listener) {
-
         // Volley-call
         final JsonObjectRequest json = new JsonObjectRequest(
                 Request.Method.GET, uri.toString(),

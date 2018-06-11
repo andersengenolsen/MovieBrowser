@@ -26,7 +26,7 @@ public abstract class BaseService {
     /**
      * RequestQueue Volley-library
      */
-    RequestQueue queue;
+    protected RequestQueue queue;
     /**
      * Activity context
      */
@@ -34,11 +34,11 @@ public abstract class BaseService {
     /**
      * @see JsonParser
      */
-    JsonParser jsonParser;
+    protected JsonParser jsonParser;
     /**
      * API KEY
      */
-    String apiKey;
+    protected String apiKey;
 
     /**
      * Constructor.
@@ -73,7 +73,6 @@ public abstract class BaseService {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("Base", error.getMessage());
                 listener.onError(context.getString(R.string.error));
             }
         }

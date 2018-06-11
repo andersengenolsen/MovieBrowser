@@ -37,7 +37,8 @@
 
         <activity
             android:name=".activities.MediaCollectionActivity"
-            android:parentActivityName=".activities.MainActivity" />
+            android:parentActivityName=".activities.MainActivity"
+            android:configChanges="orientation|screenSize"/>
 
         <!-- No parent, reachable through several activites -->
         <activity

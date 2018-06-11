@@ -7,7 +7,6 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/colorPrimaryText</item>
-        <item name="android:itemBackground">@color/colorBackground</item>
         <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
     </style>
 

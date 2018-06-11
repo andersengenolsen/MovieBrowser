@@ -22,7 +22,7 @@ import olsen.anders.movieapp.model.Genre;
  * @see olsen.anders.movieapp.activities.MainActivity
  */
 
-public class RecyclerStringListAdapter extends RecyclerAdapter {
+public class RecyclerStringListAdapter extends RecyclerAdapter<String> {
 
     /**
      * Constructor.
@@ -57,8 +57,8 @@ public class RecyclerStringListAdapter extends RecyclerAdapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         RecyclerListHolder recyclerListHolder = (RecyclerListHolder) holder;
-        Genre entry = (Genre) content.get(position);
-        recyclerListHolder.entry.setText(entry.getGenre());
+        String entry = content.get(position);
+        recyclerListHolder.entry.setText(entry);
     }
 
     /**

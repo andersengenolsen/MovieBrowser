@@ -75,11 +75,11 @@ public class TmdbConstants {
      */
     public static final String POPULARITY_DESC = "popularity.desc";
     /**
-     * Media type movies, plural
+     * Media type movie
      */
     public final static String MEDIA_TYPE_MOVIE = "movie";
     /**
-     * Media type movie
+     * Media type movies
      */
     public final static String MEDIA_TYPE_MOVIES = "movies";
     /**

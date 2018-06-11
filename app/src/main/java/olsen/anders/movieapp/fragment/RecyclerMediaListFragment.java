@@ -27,7 +27,7 @@ import olsen.anders.movieapp.model.MediaObject;
  * @see RecyclerClickListener
  */
 
-public class RecyclerMediaListFragment extends RecyclerListFragment {
+public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject> {
 
     /**
      * Obtaining bundle with mediaobjects.
@@ -41,7 +41,7 @@ public class RecyclerMediaListFragment extends RecyclerListFragment {
         if (savedInstanceState != null) {
             contentList = savedInstanceState.getParcelableArrayList(CONTENT_KEY);
         } else if (contentList == null) {
-            contentList = new ArrayList<MediaObject>();
+            contentList = new ArrayList<>();
         }
 
         return super.onCreateView(inflater, container, savedInstanceState);

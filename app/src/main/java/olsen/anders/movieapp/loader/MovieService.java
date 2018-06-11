@@ -85,14 +85,20 @@ public class MovieService extends BaseMovieTvService {
         fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_MOVIE);
     }
 
+    /**
+     * Downloading mediaobjects based on genre
+     *
+     * @param genre    {@link Genre}
+     * @param listener fired when downloaded
+     */
     @Override
     public void getByGenre(Genre genre, TmdbListener<ArrayList<MediaObject>> listener) {
         int genreId = genre.getId();
 
-        Uri uri = Uri.parse(API_BASE_URL + URL_DISCOVER + URL_MOVIE)
+        Uri uri = Uri.parse(API_BASE_URL + URL_DISCOVER + MEDIA_TYPE_MOVIE)
                 .buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
-                //.appendQueryParameter(PARAM_SORT_BY, POPULARITY_DESC)
+                .appendQueryParameter(PARAM_SORT_BY, POPULARITY_DESC)
                 .appendQueryParameter(PARAM_WITH_GENRES, String.valueOf(genreId))
                 .build();
 
@@ -100,16 +106,17 @@ public class MovieService extends BaseMovieTvService {
     }
 
     /**
-     * Downloading list with URL_TV genres
+     * Downloding all movie genres.
      *
-     * @see #fetchMediaGenres(String)
+     * @param listener fired when downloaded.
      */
-    public void downloadMovieGenres() {
+    @Override
+    public void getAllGenres(TmdbListener<ArrayList<Genre>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_GENRE + URL_MOVIE + URL_LIST).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
                 .build();
 
-        fetchMediaGenres(uri.toString());
+        fetchMediaGenres(uri.toString(), listener);
     }
 
     /**

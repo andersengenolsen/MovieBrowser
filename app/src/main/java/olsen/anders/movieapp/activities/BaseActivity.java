@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import olsen.anders.movieapp.loader.MovieService;
 import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.loader.TmdbManager;
 import olsen.anders.movieapp.loader.TvService;
+import olsen.anders.movieapp.model.Genre;
 
 
 /**
@@ -125,8 +127,8 @@ public class BaseActivity extends AppCompatActivity
 
         // Fetching genres.
         if (!tmdb.hasGenres()) {
-            movieService.downloadMovieGenres();
-            tvService.downloadTVGenres();
+            movieService.getAllGenres(null);
+            tvService.getAllGenres(null);
         }
 
         setContentView(R.layout.activity_base);

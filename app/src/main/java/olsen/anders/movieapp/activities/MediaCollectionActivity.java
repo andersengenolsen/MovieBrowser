@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.MainPagerAdapter;
@@ -60,6 +60,15 @@ public class MediaCollectionActivity extends BaseActivity implements
      */
     private BaseMovieTvService service;
 
+    /**
+     * Arraylist with genres
+     */
+    private ArrayList<Genre> genreList;
+
+    /**
+     * Pageradapter for the tabs
+     */
+    private MainPagerAdapter mainPagerAdapter;
 
     /**
      * Implementation of click event in the RecyclerMediaListFragment.
@@ -76,31 +85,52 @@ public class MediaCollectionActivity extends BaseActivity implements
     @Override
     public void onItemClicked(RecyclerAdapter adapter, int position) {
         if (adapter instanceof RecyclerMediaListAdapter) {
-            MediaObject mediaObject = (MediaObject) adapter.getElement(position);
+
+            RecyclerMediaListAdapter rAdapter = (RecyclerMediaListAdapter) adapter;
+            MediaObject mediaObject = rAdapter.getElement(position);
 
             Intent intent = new Intent(this, MediaObjectActivity.class);
             intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
-
             startActivity(intent);
+
         } else if (adapter instanceof RecyclerStringListAdapter) {
-            Genre genre = (Genre) adapter.getElement(position);
+
+            RecyclerStringListAdapter rAdapter = (RecyclerStringListAdapter) adapter;
+            String genreString = rAdapter.getElement(position);
+
+            Genre genre = null;
+            // Finding correct genre to pass to service
+            for (Genre g : genreList) {
+                if (genreString.equalsIgnoreCase(g.getGenre())) {
+                    genre = g;
+                    break;
+                }
+            }
+
+            if (genre == null) {
+                showToast(getString(R.string.no_genres));
+                return;
+            }
 
             service.getByGenre(genre, new TmdbListener<ArrayList<MediaObject>>() {
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
                     genreMediaTab.setContent(result);
-                    getSupportFragmentManager().beginTransaction().remove(genreTab);
+                    genreTab.showChildFragment(genreMediaTab);
                 }
 
                 @Override
                 public void onError(String result) {
-                    Log.d("Media", result);
-
+                    showToast(result);
                 }
             });
         }
     }
 
+    /**
+     * Initial setup of fragments.
+     * Handling intent, which indicates whether "movie" or "tv".
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +142,7 @@ public class MediaCollectionActivity extends BaseActivity implements
         genreMediaTab = new RecyclerMediaListFragment();
 
         genreTab = new RecyclerStringListFragment();
+        genreList = new ArrayList<>();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -137,6 +168,9 @@ public class MediaCollectionActivity extends BaseActivity implements
         setUpTabLayout();
     }
 
+    /**
+     * Saving state of title
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -144,18 +178,28 @@ public class MediaCollectionActivity extends BaseActivity implements
     }
 
     /**
-     * Setting genres
+     * Setting genres to the genre tab.
+     * If no genres has been downloaded yet, the method returns.
      */
     private void fetchGenres() {
-        ArrayList<Genre> genres = new ArrayList<>();
-        Map<String, ?> genreMap = getGenres();
+        service.getAllGenres(new TmdbListener<ArrayList<Genre>>() {
+            @Override
+            public void onSuccess(ArrayList<Genre> result) {
+                genreList = result;
+                ArrayList<String> genreStrings = new ArrayList<>();
 
-        for (Map.Entry<String, ?> entry : genreMap.entrySet()) {
-            Genre genre = new Genre(Integer.parseInt(entry.getKey()), (String) entry.getValue());
-            genres.add(genre);
-        }
+                for (Genre g : genreList)
+                    genreStrings.add(g.getGenre());
 
-        genreTab.setContent(genres);
+                genreTab.setContent(genreStrings);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
+
     }
 
     /**
@@ -209,11 +253,11 @@ public class MediaCollectionActivity extends BaseActivity implements
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         // Adapter to administrate the fragments (the tabs).
-        MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager(),
+        mainPagerAdapter = new MainPagerAdapter(getSupportFragmentManager(),
                 topRatedTab, upcomingTab, genreTab);
 
         final ViewPager viewPager = findViewById(R.id.pager);
-        viewPager.setAdapter(adapter);
+        viewPager.setAdapter(mainPagerAdapter);
 
         // Setting EventListeners
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -242,5 +286,26 @@ public class MediaCollectionActivity extends BaseActivity implements
             }
 
         });
+    }
+
+    /**
+     * Overriding default.
+     * In some fragments the childFragmentManager is used.
+     * If there is a fragment on any childFragmentManager's backstack, we pop it.
+     * else, we return to the previous activity.
+     */
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getSupportFragmentManager();
+        for (Fragment frag : fm.getFragments()) {
+            if (frag.isVisible()) {
+                FragmentManager childFm = frag.getChildFragmentManager();
+                if (childFm.getBackStackEntryCount() > 0) {
+                    childFm.popBackStack();
+                    return;
+                }
+            }
+        }
+        super.onBackPressed();
     }
 }
