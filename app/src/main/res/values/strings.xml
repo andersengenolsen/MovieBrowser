@@ -39,13 +39,10 @@
     <string name="video_not_found">Video not found</string>
     <string name="trailer_not_found">Trailer not found</string>
     <string name="search">SEARCH</string>
-<<<<<<< HEAD
     <string name="added_rating">Added rating</string>
     <string name="error_rating">Error adding rating</string>
     <string name="done">Done!</string>
     <string name="add_rating">Add rating</string>
-=======
     <string name="genres">Genres</string>
     <string name="no_genres">Unable to download genres</string>
->>>>>>> devel
 </resources>
