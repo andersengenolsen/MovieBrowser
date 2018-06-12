@@ -27,8 +27,6 @@ import olsen.anders.movieapp.config.Config;
 
 public class TmdbManager {
 
-    private final static String LOG_TAG = TmdbManager.class.getSimpleName();
-
     /**
      * @see MovieService
      */
@@ -63,6 +61,14 @@ public class TmdbManager {
      * RequestQueue Volley-API
      */
     private RequestQueue queue;
+    /**
+     * @see MovieAccountService
+     */
+    private MovieAccountService movieAccountService;
+    /**
+     * @see TvAccountService
+     */
+    private TvAccountService tvAccountService;
 
     /**
      * Private constructor. Called from getInstance().
@@ -76,6 +82,8 @@ public class TmdbManager {
         queue = Volley.newRequestQueue(context);
 
         accountService = new AccountService(context, queue, jsonParser, Config.TMDB_API_KEY);
+        movieAccountService = new MovieAccountService(context, queue, jsonParser, Config.TMDB_API_KEY);
+        tvAccountService = new TvAccountService(context, queue, jsonParser, Config.TMDB_API_KEY);
         movieService = new MovieService(context, queue, jsonParser, Config.TMDB_API_KEY);
         tvService = new TvService(context, queue, jsonParser, Config.TMDB_API_KEY);
         searchService = new SearchService(context, queue, jsonParser, Config.TMDB_API_KEY);
@@ -136,5 +144,19 @@ public class TmdbManager {
      */
     public SearchService getSearchService() {
         return searchService;
+    }
+
+    /**
+     * @return {@link MovieAccountService}
+     */
+    public MovieAccountService getMovieAccountService() {
+        return movieAccountService;
+    }
+
+    /**
+     * @return {@link TvAccountService}
+     */
+    public TvAccountService getTvAccountService() {
+        return tvAccountService;
     }
 }

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
@@ -42,7 +43,7 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
     /**
      * ArrayList with content in list
      */
-    protected ArrayList<AnyType> contentList;
+    protected List<AnyType> contentList;
 
     /**
      * The adapter.
@@ -51,8 +52,6 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
 
     /**
      * Activites must implement the local interface
-     *
-     * @param savedInstanceState
      */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,7 +61,7 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
             fragmentListener = (ListFragmentListener) getActivity();
         } catch (ClassCastException err) {
             throw new ClassCastException(getActivity().getClass().getSimpleName()
-                    + " must implement " + RecyclerListFragment.class.getSimpleName());
+                    + " must implement " + ListFragmentListener.class.getSimpleName());
         }
     }
 
@@ -82,6 +81,8 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
+        if (contentList == null)
+            contentList = new ArrayList<>();
         setUpRecycler(view);
         return view;
     }
@@ -96,19 +97,39 @@ public abstract class RecyclerListFragment<AnyType> extends Fragment
     protected abstract void setUpRecycler(View v);
 
     /**
-     * Updating the list with content
+     * Replacing the current content in the list with new content.
      *
-     * @param contentList list with content
+     * @param contentList list with new content
      */
-    public void setContent(ArrayList<AnyType> contentList) {
-        if (this.contentList == null)
-            this.contentList = new ArrayList<>();
+    public void setContent(List<AnyType> contentList) {
+        this.contentList = contentList;
+        notifyAdapter();
+    }
 
-        this.contentList.addAll(contentList);
+    /**
+     * Appending content to the current list in the fragment.
+     *
+     * @param contentList list with content to append
+     */
+    public void appendContent(List<AnyType> contentList) {
+        if (this.contentList == null || this.contentList.isEmpty())
+            setContent(contentList);
+        else {
+            this.contentList.addAll(contentList);
+            notifyAdapter();
+        }
+    }
 
+    /**
+     * Notifying the adapter about changes in the list content.
+     */
+    protected void notifyAdapter() {
         if (adapter != null) {
             adapter.setContent(this.contentList);
             adapter.notifyDataSetChanged();
         }
+
     }
+
+
 }

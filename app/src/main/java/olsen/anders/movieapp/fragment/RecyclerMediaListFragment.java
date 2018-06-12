@@ -1,9 +1,11 @@
 package olsen.anders.movieapp.fragment;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,11 +33,6 @@ import olsen.anders.movieapp.model.MediaObject;
 public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject> {
 
     /**
-     * The recyclerview in the layout
-     */
-    private RecyclerView recyclerView;
-
-    /**
      * Obtaining bundle with mediaobjects.
      *
      * @see #setUpRecycler(View)
@@ -43,21 +40,23 @@ public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject>
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
 
         if (savedInstanceState != null) {
             contentList = savedInstanceState.getParcelableArrayList(CONTENT_KEY);
-        } else if (contentList == null) {
-            contentList = new ArrayList<>();
+            notifyAdapter();
         }
 
-        return super.onCreateView(inflater, container, savedInstanceState);
-
+        return view;
     }
 
+    /**
+     * Retaining content in list.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(CONTENT_KEY, contentList);
+        outState.putParcelableArrayList(CONTENT_KEY, (ArrayList<? extends Parcelable>) contentList);
     }
 
     /**
@@ -69,11 +68,8 @@ public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject>
      */
     @Override
     protected void setUpRecycler(View v) {
-        if (recyclerView != null)
-            return;
-
         adapter = new RecyclerMediaListAdapter(getActivity(), contentList);
-        recyclerView = v.findViewById(R.id.recycler_list);
+        RecyclerView recyclerView = v.findViewById(R.id.recycler_list);
         recyclerView.addOnItemTouchListener(new RecyclerClickListener(getActivity(), this));
         recyclerView.setAdapter(adapter);
 
@@ -81,6 +77,9 @@ public class RecyclerMediaListFragment extends RecyclerListFragment<MediaObject>
                 LinearLayoutManager.VERTICAL, false);
 
         recyclerView.setLayoutManager(layoutManager);
+
+        // Adding scroll-listener for pagination
+        // Interface fired when scroll to bottom.
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {

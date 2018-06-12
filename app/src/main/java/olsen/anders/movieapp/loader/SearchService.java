@@ -7,10 +7,12 @@ import com.android.volley.RequestQueue;
 
 import java.util.ArrayList;
 
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
 
 import static olsen.anders.movieapp.constants.TmdbConstants.API_BASE_URL;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_API_KEY;
+import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_PAGE;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_QUERY;
 import static olsen.anders.movieapp.constants.TmdbConstants.URL_SEARCH;
 
@@ -36,14 +38,16 @@ public class SearchService extends BaseService {
      * the type itself.
      *
      * @param query    query to search for
+     * @param page     page to load from api
      * @param listener TmdbListener
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
-    public void searchMoviesAndTV(String query,
+    public void searchMoviesAndTV(String query, int page,
                                   final TmdbListener<ArrayList<MediaObject>> listener) {
 
         Uri uri = Uri.parse(API_BASE_URL + URL_SEARCH).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .appendQueryParameter(PARAM_QUERY, query)
                 .build();
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -17,7 +16,7 @@ import olsen.anders.movieapp.listener.EndlessRecyclerViewScrollListener;
 import olsen.anders.movieapp.listener.RecyclerClickListener;
 import olsen.anders.movieapp.loader.BaseMovieTvService;
 import olsen.anders.movieapp.loader.MovieService;
-import olsen.anders.movieapp.loader.TmdbListener;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.loader.TvService;
 import olsen.anders.movieapp.model.MediaObject;
 

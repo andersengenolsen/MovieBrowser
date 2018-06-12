@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.model.MediaObject;
@@ -31,7 +32,7 @@ public class RecyclerImageAdapter extends RecyclerAdapter<MediaObject> {
      * @param context Activity context
      * @param content ArrayList with mediaobjects
      */
-    public RecyclerImageAdapter(Context context, ArrayList<MediaObject> content) {
+    public RecyclerImageAdapter(Context context, List<MediaObject> content) {
         super(context, content);
     }
 

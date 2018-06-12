@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.model.MediaObject;
@@ -33,7 +34,7 @@ public class RecyclerMediaListAdapter extends RecyclerAdapter<MediaObject> {
      * @param context      Activity context
      * @param mediaObjects ArrayList with mediaobjects
      */
-    public RecyclerMediaListAdapter(Context context, ArrayList<MediaObject> mediaObjects) {
+    public RecyclerMediaListAdapter(Context context, List<MediaObject> mediaObjects) {
         super(context, mediaObjects);
     }
 

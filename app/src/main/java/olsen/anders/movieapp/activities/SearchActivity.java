@@ -10,11 +10,10 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
-import olsen.anders.movieapp.fragment.RecyclerListFragment;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.listener.ListFragmentListener;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.loader.SearchService;
-import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
 
 /**
@@ -27,8 +26,6 @@ import olsen.anders.movieapp.model.MediaObject;
 public class SearchActivity extends BaseActivity
         implements ListFragmentListener {
 
-    private static final String LOG_TAG = SearchActivity.class.getSimpleName();
-
     /**
      * @see SearchService
      */
@@ -38,6 +35,11 @@ public class SearchActivity extends BaseActivity
      * @see RecyclerMediaListFragment
      */
     private RecyclerMediaListFragment searchResults;
+
+    /**
+     * The search query
+     */
+    private String query;
 
     /**
      * Getting query from calling activity.
@@ -78,27 +80,14 @@ public class SearchActivity extends BaseActivity
      * Updating the content in the list, placing the searchresults in the RecyclerMediaListFragment.
      */
     private void handleIntent(Intent intent) {
-
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+            query = intent.getStringExtra(SearchManager.QUERY);
 
-            if (query != null) {
-                setTitle(query);
+            if (query == null)
+                return;
 
-                searchService.searchMoviesAndTV(query,
-                        new TmdbListener<ArrayList<MediaObject>>() {
-                            @Override
-                            public void onSuccess(ArrayList<MediaObject> result) {
-                                searchResults.setContent(result);
-                                addFragmentToLayout(searchResults, "SearchResults");
-                            }
-
-                            @Override
-                            public void onError(String result) {
-                                showToast(result);
-                            }
-                        });
-            }
+            setTitle(query);
+            loadSearchResultsFromApi(query, 1);
         }
     }
 
@@ -112,15 +101,44 @@ public class SearchActivity extends BaseActivity
     @Override
     public void onItemClicked(RecyclerAdapter adapter, int position) {
         MediaObject mediaObject = (MediaObject) adapter.getElement(position);
-
-        Intent intent = new Intent(this, MediaObjectActivity.class);
-        intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
-        startActivity(intent);
+        startMediaObjectActivity(this, mediaObject);
     }
 
+    /**
+     * Implementation of {@link ListFragmentListener}
+     *
+     * @param page     page to load.
+     * @param fragment fragment to load into
+     */
     @Override
     public void onScrollEnd(int page, Fragment fragment) {
+        loadSearchResultsFromApi(query, ++page);
+    }
 
+    /**
+     * Loading search results from the API.
+     *
+     * @param query search query
+     * @param page  pagination API
+     * @see SearchService#searchMoviesAndTV(String, int, TmdbListener)
+     */
+    private void loadSearchResultsFromApi(String query, final int page) {
+        searchService.searchMoviesAndTV(query, page,
+                new TmdbListener<ArrayList<MediaObject>>() {
+                    @Override
+                    public void onSuccess(ArrayList<MediaObject> result) {
+                        if (page == 1) {
+                            searchResults.setContent(result);
+                            addFragmentToLayout(searchResults, "SearchTag");
+                        } else
+                            searchResults.appendContent(result);
+                    }
+
+                    @Override
+                    public void onError(String result) {
+                        showToast(result);
+                    }
+                });
     }
 
     /**

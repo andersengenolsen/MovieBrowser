@@ -7,6 +7,7 @@ import com.android.volley.RequestQueue;
 
 import java.util.ArrayList;
 
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -45,6 +46,7 @@ public class TvService extends BaseMovieTvService {
      * Fetching current popular URL_TV shows
      *
      * @param listener listener, fired when downloaded
+     * @param page     page to load from API
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
@@ -61,6 +63,7 @@ public class TvService extends BaseMovieTvService {
      * Fetching top rated URL_TV shows.
      *
      * @param listener listener, fired when downloaded
+     * @param page     page to load from API
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
@@ -77,6 +80,7 @@ public class TvService extends BaseMovieTvService {
      * Fetching URL_TV on the air.
      *
      * @param listener listener, fired when downloaded
+     * @param page     page to load from API
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
     @Override
@@ -107,6 +111,7 @@ public class TvService extends BaseMovieTvService {
      * Fetching mediaobjects by genre
      *
      * @param genre    {@link Genre}
+     * @param page     page to load from API
      * @param listener fired when downloaded
      */
     @Override
@@ -140,5 +145,4 @@ public class TvService extends BaseMovieTvService {
 
         super.getTrailerUrl(uri, listener);
     }
-
 }

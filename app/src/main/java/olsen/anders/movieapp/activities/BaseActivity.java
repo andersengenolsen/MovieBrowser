@@ -25,7 +25,6 @@ import android.widget.FrameLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,11 +33,13 @@ import olsen.anders.movieapp.fragment.LoginDialogFragment;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.listener.LoginDialogListener;
 import olsen.anders.movieapp.loader.AccountService;
+import olsen.anders.movieapp.loader.MovieAccountService;
 import olsen.anders.movieapp.loader.MovieService;
-import olsen.anders.movieapp.loader.TmdbListener;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.loader.TmdbManager;
+import olsen.anders.movieapp.loader.TvAccountService;
 import olsen.anders.movieapp.loader.TvService;
-import olsen.anders.movieapp.model.Genre;
+import olsen.anders.movieapp.model.MediaObject;
 
 
 /**
@@ -111,6 +112,14 @@ public class BaseActivity extends AppCompatActivity
      */
     protected AccountService accountService;
     /**
+     * Account calls for movies
+     */
+    protected MovieAccountService movieAccountService;
+    /**
+     * Account calls for TV
+     */
+    protected TvAccountService tvAccountService;
+    /**
      * Layout for subactivities
      */
     private FrameLayout frameLayout;
@@ -120,10 +129,11 @@ public class BaseActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         tmdb = TmdbManager.getInstance(this);
-
         movieService = tmdb.getMovieService();
         tvService = tmdb.getTvService();
         accountService = tmdb.getAccountService();
+        movieAccountService = tmdb.getMovieAccountService();
+        tvAccountService = tmdb.getTvAccountService();
 
         // Fetching genres.
         if (!tmdb.hasGenres()) {
@@ -288,13 +298,29 @@ public class BaseActivity extends AppCompatActivity
     }
 
     /**
-     * Returning all genres if downloaded
+     * Returning all genres if downloaded.
+     * Genres are fetched from SharedPrefs
+     *
+     * @return Map with genres
      */
     protected Map<String, ?> getGenres() {
         // Map with genres from Shared Prefs
         SharedPreferences prefs = getSharedPreferences(SHARED_PREF_GENRES,
                 Context.MODE_PRIVATE);
         return prefs.getAll();
+    }
+
+    /**
+     * Starting a {@link MediaObjectActivity}.
+     * Used in several subactivities
+     *
+     * @param context     subactivity context
+     * @param mediaObject {@link MediaObject} to show
+     */
+    protected final void startMediaObjectActivity(Context context, MediaObject mediaObject) {
+        Intent intent = new Intent(context, MediaObjectActivity.class);
+        intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
+        startActivity(intent);
     }
 
     /**

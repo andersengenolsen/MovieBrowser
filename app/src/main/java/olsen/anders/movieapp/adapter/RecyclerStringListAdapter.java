@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.model.Genre;
@@ -30,7 +31,7 @@ public class RecyclerStringListAdapter extends RecyclerAdapter<String> {
      * @param context Activity context
      * @param content ArrayList with String content in list
      */
-    public RecyclerStringListAdapter(Context context, ArrayList<String> content) {
+    public RecyclerStringListAdapter(Context context, List<String> content) {
         super(context, content);
     }
 

@@ -7,6 +7,7 @@ import com.android.volley.RequestQueue;
 
 import java.util.ArrayList;
 
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -44,6 +45,7 @@ public class MovieService extends BaseMovieTvService {
     /**
      * Fetching current popular movies.
      *
+     * @param page     page to load from API
      * @param listener listener fired when downloaded
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
@@ -60,6 +62,7 @@ public class MovieService extends BaseMovieTvService {
     /**
      * Fetching top rated movies.
      *
+     * @param page     page to load from API
      * @param listener listener, fired when downloaded
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
@@ -76,6 +79,7 @@ public class MovieService extends BaseMovieTvService {
     /**
      * Fetching upcoming movies.
      *
+     * @param page     page to load from API
      * @param listener listener, fired when downloaded
      * @see #fetchMediaObjects(String, TmdbListener, String)
      */
@@ -92,6 +96,7 @@ public class MovieService extends BaseMovieTvService {
     /**
      * Downloading mediaobjects based on genre
      *
+     * @param page     page to load from API
      * @param genre    {@link Genre}
      * @param listener fired when downloaded
      */

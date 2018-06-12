@@ -18,8 +18,8 @@ import olsen.anders.movieapp.adapter.RecyclerStringListAdapter;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
 import olsen.anders.movieapp.fragment.RecyclerStringListFragment;
 import olsen.anders.movieapp.listener.ListFragmentListener;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.loader.BaseMovieTvService;
-import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.Genre;
 import olsen.anders.movieapp.model.MediaObject;
 
@@ -84,6 +84,8 @@ public class MediaCollectionActivity extends BaseActivity implements
      * been clicked.
      * <p>
      * If not, the genre tab has been clicked. Replacing the genre tab with a list.
+     * <p>
+     * Implementation of {@link ListFragmentListener}
      *
      * @see MediaObjectActivity
      */
@@ -93,10 +95,7 @@ public class MediaCollectionActivity extends BaseActivity implements
 
             RecyclerMediaListAdapter rAdapter = (RecyclerMediaListAdapter) adapter;
             MediaObject mediaObject = rAdapter.getElement(position);
-
-            Intent intent = new Intent(this, MediaObjectActivity.class);
-            intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
-            startActivity(intent);
+            startMediaObjectActivity(this, mediaObject);
 
         } else if (adapter instanceof RecyclerStringListAdapter) {
 
@@ -110,18 +109,14 @@ public class MediaCollectionActivity extends BaseActivity implements
                     break;
                 }
             }
-
-            if (chosenGenre == null) {
-                showToast(getString(R.string.no_genres));
-                return;
-            }
-
+            // Loading from service
             loadGenreMediaFromApi(1, chosenGenre);
         }
     }
 
     /**
      * Loading from API on scroll end
+     * Implementation of {@link ListFragmentListener}
      *
      * @param page     page in api
      * @param fragment fragment to load into
@@ -139,7 +134,14 @@ public class MediaCollectionActivity extends BaseActivity implements
 
     /**
      * Initial setup of fragments.
-     * Handling intent, which indicates whether "movie" or "tv".
+     * Handling intent.
+     * Loading data from API.
+     *
+     * @see #handleIntent(Intent, Bundle)
+     * @see #loadUpcomingFromApi(int)
+     * @see #loadTopRatedFromApi(int)
+     * @see #fetchGenres()
+     * @see #setUpTabLayout()
      */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,14 +153,28 @@ public class MediaCollectionActivity extends BaseActivity implements
         upcomingTab = new RecyclerMediaListFragment();
         genreMediaTab = new RecyclerMediaListFragment();
         genreTab = new RecyclerStringListFragment();
-
         genreList = new ArrayList<>();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Handling intent. Movie or TV show?
-        Intent intent = getIntent();
+        // Initial setup.
+        handleIntent(getIntent(), savedInstanceState);
+        loadUpcomingFromApi(1);
+        loadTopRatedFromApi(1);
+        fetchGenres();
+        setUpTabLayout();
+    }
 
+    /**
+     * Handling the intent from calling activity.
+     * The MEDIA_TYPE_KEY decide the title of the activity,
+     * and if the service will be a {@link olsen.anders.movieapp.loader.TvService}
+     * or a {@link olsen.anders.movieapp.loader.MovieService}
+     *
+     * @param intent             Intent from calling activity
+     * @param savedInstanceState orientation change
+     */
+    private void handleIntent(Intent intent, Bundle savedInstanceState) {
         if (intent != null) {
             int type = intent.getIntExtra(BaseActivity.MEDIA_TYPE_KEY, 0);
             if (type == BaseActivity.MEDIA_TYPE_TV) {
@@ -168,23 +184,24 @@ public class MediaCollectionActivity extends BaseActivity implements
                 service = movieService;
                 setTitle(R.string.movies);
             }
-            fetchGenres();
         } else {
             if (savedInstanceState != null)
                 setTitle(savedInstanceState.getString(MEDIA_TYPE_KEY));
         }
-
-        loadUpcomingFromApi(1);
-        loadTopRatedFromApi(1);
-
-        setUpTabLayout();
     }
 
+    /**
+     * Loading top rated mediaobjects from the API.
+     * On successful call, the result is appended to the appropriate fragment.
+     *
+     * @param page pagination
+     * @see BaseMovieTvService#getTopRated(int, TmdbListener)
+     */
     private void loadTopRatedFromApi(int page) {
         service.getTopRated(page, new TmdbListener<ArrayList<MediaObject>>() {
             @Override
             public void onSuccess(ArrayList<MediaObject> result) {
-                topRatedTab.setContent(result);
+                topRatedTab.appendContent(result);
             }
 
             @Override
@@ -194,11 +211,18 @@ public class MediaCollectionActivity extends BaseActivity implements
         });
     }
 
+    /**
+     * Loading top upcoming mediaobjects from the API.
+     * On successful call, the result is appended to the appropriate fragment.
+     *
+     * @param page pagination
+     * @see BaseMovieTvService#getUpcoming(int, TmdbListener)
+     */
     private void loadUpcomingFromApi(int page) {
         service.getUpcoming(page, new TmdbListener<ArrayList<MediaObject>>() {
             @Override
             public void onSuccess(ArrayList<MediaObject> result) {
-                upcomingTab.setContent(result);
+                upcomingTab.appendContent(result);
             }
 
             @Override
@@ -208,13 +232,28 @@ public class MediaCollectionActivity extends BaseActivity implements
         });
     }
 
+    /**
+     * Loading mediaobjects by genre from the API.
+     * On successful call, the result is appended to the appropriate fragment.
+     *
+     * @param page pagination
+     * @see BaseMovieTvService#getByGenre(int, Genre, TmdbListener)
+     */
     private void loadGenreMediaFromApi(final int page, Genre genre) {
+        if (genre == null) {
+            showToast(getString(R.string.no_genres));
+            return;
+        }
+
+        // Loading
         service.getByGenre(page, genre, new TmdbListener<ArrayList<MediaObject>>() {
             @Override
             public void onSuccess(ArrayList<MediaObject> result) {
-                genreMediaTab.setContent(result);
-                if (page == 1)
+                if (page == 1) {
+                    genreMediaTab.setContent(result);
                     genreTab.showChildFragment(genreMediaTab);
+                } else
+                    genreMediaTab.appendContent(result);
             }
 
             @Override

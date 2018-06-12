@@ -1,4 +1,6 @@
-package olsen.anders.movieapp.loader;
+package olsen.anders.movieapp.listener;
+
+import olsen.anders.movieapp.loader.TmdbManager;
 
 /**
  * Generic interface, fired when data is downloaded from TMDB-API.

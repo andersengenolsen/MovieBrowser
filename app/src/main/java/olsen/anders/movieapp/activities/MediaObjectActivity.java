@@ -15,9 +15,10 @@ import com.squareup.picasso.RequestCreator;
 import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.fragment.RatingDialogFragment;
 import olsen.anders.movieapp.fragment.YoutubeFragment;
+import olsen.anders.movieapp.interfaces.Saveable;
 import olsen.anders.movieapp.listener.RatingDialogListener;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.loader.BaseMovieTvService;
-import olsen.anders.movieapp.loader.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
 
 /**
@@ -66,6 +67,10 @@ public class MediaObjectActivity extends BaseActivity
      * Key for saved instance state, favoritelist
      */
     private final String FAVORITE_FLAG = "favorite_flag";
+    /**
+     * {@link olsen.anders.movieapp.interfaces.Saveable}
+     */
+    private Saveable saveable;
 
     /**
      * Handling intent.
@@ -94,38 +99,17 @@ public class MediaObjectActivity extends BaseActivity
             inWatchlist = savedInstanceState.getBoolean(WATCHLIST_FLAG);
             alternateButtonColor(favoriteBtn, inFavoritelist);
             alternateButtonColor(watchlistBtn, inWatchlist);
-
         }
+
+        if (mediaObject.isMovie())
+            saveable = tmdb.getMovieAccountService();
+        else
+            saveable = tmdb.getTvAccountService();
 
         // Changing color of watchlist and favorite button.
         // Green indicating that it is saved in list.
         if (accountService.isLoggedIn()) {
-            accountService.hasInFavorite(mediaObject, new TmdbListener<Boolean>() {
-                @Override
-                public void onSuccess(Boolean inList) {
-                    inFavoritelist = inList;
-                    if (inList)
-                        alternateButtonColor(favoriteBtn, inFavoritelist);
-                }
-
-                @Override
-                public void onError(String result) {
-
-                }
-            });
-            accountService.hasInWatchlist(mediaObject, new TmdbListener<Boolean>() {
-                @Override
-                public void onSuccess(Boolean inList) {
-                    inWatchlist = inList;
-                    if (inList)
-                        alternateButtonColor(watchlistBtn, inWatchlist);
-                }
-
-                @Override
-                public void onError(String result) {
-
-                }
-            });
+            fetchLists();
         }
     }
 
@@ -164,7 +148,6 @@ public class MediaObjectActivity extends BaseActivity
      * @param button Button which will change background
      */
     private void alternateButtonColor(ImageButton button, boolean inList) {
-
         if (inList)
             button.setBackgroundColor(getColor(R.color.colorChecked));
         else
@@ -269,11 +252,11 @@ public class MediaObjectActivity extends BaseActivity
      * Adding movie / URL_TV to the users favorite list.
      * If successful, the color of the button will change
      *
-     * @see olsen.anders.movieapp.loader.AccountService#addToFavoriteList(MediaObject, boolean, TmdbListener)
+     * @see Saveable#addToFavoriteList(MediaObject, boolean, TmdbListener)
      * @see #alternateButtonColor(ImageButton, boolean)
      */
     private void addFavorite() {
-        accountService.addToFavoriteList(mediaObject, !inFavoritelist,
+        saveable.addToFavoriteList(mediaObject, !inFavoritelist,
                 new TmdbListener<String>() {
                     @Override
                     public void onSuccess(String result) {
@@ -294,10 +277,10 @@ public class MediaObjectActivity extends BaseActivity
      * If successful, the color of the button will change
      *
      * @see #alternateButtonColor(ImageButton, boolean)
-     * @see olsen.anders.movieapp.loader.AccountService#addToWatchList(MediaObject, boolean, TmdbListener)
+     * @see Saveable(MediaObject, boolean, TmdbListener)
      */
     private void addWatchlist() {
-        accountService.addToWatchList(mediaObject, !inWatchlist,
+        saveable.addToWatchlist(mediaObject, !inWatchlist,
                 new TmdbListener<String>() {
                     @Override
                     public void onSuccess(String result) {
@@ -311,6 +294,39 @@ public class MediaObjectActivity extends BaseActivity
                         showToast(result);
                     }
                 });
+    }
+
+    /**
+     * Fetching user-lists from the API.
+     * The saveable can be either MovieAccountService or TvAccountService.
+     */
+    private void fetchLists() {
+        saveable.hasInFavoriteList(mediaObject, new TmdbListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean inList) {
+                inFavoritelist = inList;
+                if (inList)
+                    alternateButtonColor(favoriteBtn, inFavoritelist);
+            }
+
+            @Override
+            public void onError(String result) {
+
+            }
+        });
+        saveable.hasInWatchlist(mediaObject, new TmdbListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean inList) {
+                inWatchlist = inList;
+                if (inList)
+                    alternateButtonColor(watchlistBtn, inWatchlist);
+            }
+
+            @Override
+            public void onError(String result) {
+
+            }
+        });
     }
 
     /**

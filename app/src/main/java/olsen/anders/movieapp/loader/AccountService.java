@@ -15,6 +15,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import olsen.anders.movieapp.R;
+import olsen.anders.movieapp.interfaces.Saveable;
+import olsen.anders.movieapp.listener.TmdbListener;
 import olsen.anders.movieapp.model.MediaObject;
 
 import static olsen.anders.movieapp.constants.JsonConstants.VALUE;
@@ -27,6 +29,7 @@ import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_MOVIE;
 import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_MOVIES;
 import static olsen.anders.movieapp.constants.TmdbConstants.MEDIA_TYPE_TV;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_API_KEY;
+import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_PAGE;
 import static olsen.anders.movieapp.constants.TmdbConstants.PARAM_SESSION_ID;
 import static olsen.anders.movieapp.constants.TmdbConstants.RATING;
 import static olsen.anders.movieapp.constants.TmdbConstants.WATCHLIST;
@@ -69,7 +72,7 @@ public class AccountService extends BaseService {
      * @param listener TmdbListener
      * @see #postJson(JSONObject, Uri, TmdbListener)
      */
-    public void addToWatchList(MediaObject mo, boolean status, TmdbListener<String> listener) {
+    protected void postToWatchList(MediaObject mo, boolean status, TmdbListener<String> listener) {
         if (!validateSession(listener))
             return;
         Uri uri = Uri.parse(BASE_URL_ACCOUNT + WATCHLIST).buildUpon()
@@ -98,7 +101,7 @@ public class AccountService extends BaseService {
      * @param listener TmdbListener
      * @see #postJson(JSONObject, Uri, TmdbListener)
      */
-    public void addToFavoriteList(MediaObject mo, boolean status, TmdbListener<String> listener) {
+    protected void postToFavoriteList(MediaObject mo, boolean status, TmdbListener<String> listener) {
         if (!validateSession(listener))
             return;
 
@@ -119,92 +122,6 @@ public class AccountService extends BaseService {
         }
         postJson(json, uri, listener);
     }
-
-    /**
-     * Checking if a given mediaobject is in the users favorite list.
-     *
-     * @param mo       mediaobject
-     * @param listener fired when call finished
-     * @see #constructListInnerListener(MediaObject, TmdbListener)
-     */
-    public void hasInFavorite(final MediaObject mo, final TmdbListener<Boolean> listener) {
-        if (!validateSession(listener))
-            return;
-
-        TmdbListener<ArrayList<MediaObject>> innerListener =
-                constructListInnerListener(mo, listener);
-
-        if (mo.isMovie())
-            getFavoriteListMovie(innerListener);
-        else
-            getFavoriteListTv(innerListener);
-    }
-
-    /**
-     * Checking if a given mediaobject is in the users watchlist.
-     *
-     * @param mo       mediaobject
-     * @param listener fired when call finished
-     * @see #constructListInnerListener(MediaObject, TmdbListener)
-     */
-    public void hasInWatchlist(final MediaObject mo, final TmdbListener<Boolean> listener) {
-        if (!validateSession(listener))
-            return;
-
-        TmdbListener<ArrayList<MediaObject>> innerListener =
-                constructListInnerListener(mo, listener);
-
-        if (mo.isMovie())
-            getWatchlistMovie(innerListener);
-        else
-            getWatchlistTv(innerListener);
-    }
-
-
-    /**
-     * Fetching watchlist for tv shows
-     *
-     * @param listener TmdbListener
-     */
-    public void getWatchlistTv(final TmdbListener<ArrayList<MediaObject>> listener) {
-        if (!validateSession(listener))
-            return;
-        fetchList(WATCHLIST, MEDIA_TYPE_TV, listener);
-    }
-
-    /**
-     * Fetching watchlist for movies
-     *
-     * @param listener TmdbListener
-     */
-    public void getWatchlistMovie(final TmdbListener<ArrayList<MediaObject>> listener) {
-        if (!validateSession(listener))
-            return;
-        fetchList(WATCHLIST, MEDIA_TYPE_MOVIE, listener);
-    }
-
-    /**
-     * Fetching favorite list for tv shows
-     *
-     * @param listener TmdbListener
-     */
-    public void getFavoriteListTv(final TmdbListener<ArrayList<MediaObject>> listener) {
-        if (!validateSession(listener))
-            return;
-        fetchList(FAVORITE, MEDIA_TYPE_TV, listener);
-    }
-
-    /**
-     * Fetching favorite list for movies
-     *
-     * @param listener TmdbListener
-     */
-    public void getFavoriteListMovie(final TmdbListener<ArrayList<MediaObject>> listener) {
-        if (!validateSession(listener))
-            return;
-        fetchList(FAVORITE, MEDIA_TYPE_MOVIE, listener);
-    }
-
 
     /**
      * public driver-method, requesting a token
@@ -277,7 +194,7 @@ public class AccountService extends BaseService {
      * @param listener TmdbListener, onError() fired if no session id.
      * @return true if valid session id
      */
-    private <AnyType> boolean validateSession(TmdbListener<AnyType> listener) {
+    protected <AnyType> boolean validateSession(TmdbListener<AnyType> listener) {
         sessionId = session.getSessionId();
         if (sessionId == null) {
             listener.onError(context.getString(R.string.not_logged_in));
@@ -289,12 +206,13 @@ public class AccountService extends BaseService {
     /**
      * Called from all methods where a list is fetched
      *
+     * @param page      page from API
      * @param listType  favorite / watchlist
      * @param mediaType movie / tv show
      * @param listener  TmdbListener
      */
-    private void fetchList(String listType, final String mediaType,
-                           final TmdbListener<ArrayList<MediaObject>> listener) {
+    protected void fetchList(int page, String listType, final String mediaType,
+                             final TmdbListener<ArrayList<MediaObject>> listener) {
         if (!validateSession(listener))
             return;
 
@@ -302,6 +220,7 @@ public class AccountService extends BaseService {
 
         Uri uri = Uri.parse(BASE_URL_ACCOUNT + listType + "/" + type).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .appendQueryParameter(PARAM_SESSION_ID, sessionId)
                 .build();
 
@@ -345,7 +264,7 @@ public class AccountService extends BaseService {
      * @param listener fired when list is checked
      * @return TmdbListener
      */
-    private TmdbListener<ArrayList<MediaObject>> constructListInnerListener(
+    protected TmdbListener<ArrayList<MediaObject>> constructListInnerListener(
             final MediaObject mo, final TmdbListener<Boolean> listener) {
 
         TmdbListener<ArrayList<MediaObject>> innerListener =

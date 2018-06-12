@@ -13,9 +13,11 @@ import olsen.anders.movieapp.R;
 import olsen.anders.movieapp.adapter.MainPagerAdapter;
 import olsen.anders.movieapp.adapter.RecyclerAdapter;
 import olsen.anders.movieapp.fragment.RecyclerMediaListFragment;
+import olsen.anders.movieapp.interfaces.Saveable;
 import olsen.anders.movieapp.listener.ListFragmentListener;
-import olsen.anders.movieapp.loader.TmdbListener;
-import olsen.anders.movieapp.loader.TmdbManager;
+import olsen.anders.movieapp.listener.TmdbListener;
+import olsen.anders.movieapp.loader.MovieAccountService;
+import olsen.anders.movieapp.loader.TvAccountService;
 import olsen.anders.movieapp.model.MediaObject;
 
 
@@ -42,70 +44,14 @@ public class ListActivity extends BaseActivity implements
      */
     private RecyclerMediaListFragment movieTab;
     /**
-     * URL_TV tab
+     * Tv tab
      */
     private RecyclerMediaListFragment tvTab;
-    /**
-     * Mediaobjects for the Movie tab
-     */
-    private ArrayList<MediaObject> movieList;
-    /**
-     * Mediaobjects for the URL_TV tab
-     */
-    private ArrayList<MediaObject> tvList;
-
     /**
      * The type of mediaobject, movie or tv.
      * It is either MEDIA_LIST_WATCHLIST or MEDIA_LIST_FAVORITES
      */
     private int type;
-
-    /**
-     * Implementation of RecyclerMediaListFragment.OnItemClickedListener.
-     * <p>
-     * If an item in the list is clicked, the MediaObjectActivity is started.
-     *
-     * @see RecyclerMediaListFragment.OnItemClickedListener
-     * @see MediaObjectActivity
-     */
-    @Override
-    public void onItemClicked(RecyclerAdapter adapter, int pos) {
-        MediaObject mediaObject = (MediaObject) adapter.getElement(pos);
-
-        Intent intent = new Intent(this, MediaObjectActivity.class);
-        intent.putExtra(MEDIA_OBJECT_KEY, mediaObject);
-
-        startActivity(intent);
-    }
-
-    @Override
-    public void onScrollEnd(int page, Fragment fragment) {
-
-    }
-
-    /**
-     * Fetching the appropriate list, watchlist or favorites.
-     * <p>
-     * This is done in onResume, since this activity can be on the call stack while the user
-     * removes objects from his/hers watchlist / favorite-list.
-     * <p>
-     * If it is on the call stack, the list will be updated.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (type == UNINITIALIZED)
-            return;
-
-        if (type == BaseActivity.MEDIA_LIST_WATCHLIST) {
-            setTitle(R.string.watchlist);
-        } else {
-            setTitle(R.string.favourites);
-        }
-
-        fetchList(type);
-    }
 
     /**
      * The fetching of the list is done on onResume.
@@ -144,6 +90,64 @@ public class ListActivity extends BaseActivity implements
             // Orientation change, setting correct title
             setTitle(savedInstanceState.getString(MEDIA_LIST_KEY));
         }
+    }
+
+    /**
+     * Fetching the appropriate list, watchlist or favorites.
+     * <p>
+     * This is done in onResume, since this activity can be on the call stack while the user
+     * removes objects from his/hers watchlist / favorite-list.
+     * <p>
+     * If it is on the call stack, the list will be updated.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (type == UNINITIALIZED)
+            return;
+
+        if (type == BaseActivity.MEDIA_LIST_WATCHLIST) {
+            setTitle(R.string.watchlist);
+        } else {
+            setTitle(R.string.favourites);
+        }
+
+        fetchList(1, movieAccountService);
+        fetchList(1, tvAccountService);
+    }
+
+    /**
+     * Implementation of ListFragmentListener.
+     * <p>
+     * If an item in the list is clicked, the MediaObjectActivity is started.
+     *
+     * @see ListFragmentListener#onItemClicked(RecyclerAdapter, int)
+     * @see MediaObjectActivity
+     */
+    @Override
+    public void onItemClicked(RecyclerAdapter adapter, int pos) {
+        MediaObject mediaObject = (MediaObject) adapter.getElement(pos);
+        startMediaObjectActivity(this, mediaObject);
+    }
+
+    /**
+     * Implementation of ListFragmentListener.
+     * <p>
+     * If it's scrolled to the bottom of the list, a new page is loaded from the API.
+     *
+     * @see ListFragmentListener#onScrollEnd(int, Fragment)
+     * @see MediaObjectActivity
+     */
+    @Override
+    public void onScrollEnd(int page, Fragment fragment) {
+        Saveable saveable;
+        if (fragment == movieTab)
+            saveable = movieAccountService;
+        else
+            saveable = tvAccountService;
+
+        fetchList(++page, saveable);
     }
 
     /**
@@ -215,15 +219,27 @@ public class ListActivity extends BaseActivity implements
     /**
      * Fetching MediaObjects from the users list on TMDB.
      *
-     * @see TmdbManager
+     * @see Saveable
+     * @see MovieAccountService
+     * @see TvAccountService
      */
-    private void fetchList(int listType) {
-        if (listType == MEDIA_LIST_FAVORITES) {
-            accountService.getFavoriteListMovie(new TmdbListener<ArrayList<MediaObject>>() {
+    private void fetchList(final int page, Saveable saveable) {
+
+        final RecyclerMediaListFragment fragment;
+
+        if (saveable instanceof MovieAccountService)
+            fragment = movieTab;
+        else
+            fragment = tvTab;
+
+        if (type == MEDIA_LIST_FAVORITES) {
+            saveable.getFavoriteList(page, new TmdbListener<ArrayList<MediaObject>>() {
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
-                    movieList = result;
-                    movieTab.setContent(movieList);
+                    if (page == 1)
+                        fragment.setContent(result);
+                    else
+                        fragment.appendContent(result);
                 }
 
                 @Override
@@ -231,12 +247,14 @@ public class ListActivity extends BaseActivity implements
                     showToast(result);
                 }
             });
-            accountService.getFavoriteListTv(new TmdbListener<ArrayList<MediaObject>>() {
-
+        } else if (type == MEDIA_LIST_WATCHLIST)
+            saveable.getWatchlist(page, new TmdbListener<ArrayList<MediaObject>>() {
                 @Override
                 public void onSuccess(ArrayList<MediaObject> result) {
-                    tvList = result;
-                    tvTab.setContent(tvList);
+                    if (page == 1)
+                        fragment.setContent(result);
+                    else
+                        fragment.appendContent(result);
                 }
 
                 @Override
@@ -244,31 +262,5 @@ public class ListActivity extends BaseActivity implements
                     showToast(result);
                 }
             });
-        } else {
-            accountService.getWatchlistMovie(new TmdbListener<ArrayList<MediaObject>>() {
-                @Override
-                public void onSuccess(ArrayList<MediaObject> result) {
-                    movieList = result;
-                    movieTab.setContent(result);
-                }
-
-                @Override
-                public void onError(String result) {
-                    showToast(result);
-                }
-            });
-            accountService.getWatchlistTv(new TmdbListener<ArrayList<MediaObject>>() {
-                @Override
-                public void onSuccess(ArrayList<MediaObject> result) {
-                    tvList = result;
-                    tvTab.setContent(result);
-                }
-
-                @Override
-                public void onError(String result) {
-                    showToast(result);
-                }
-            });
-        }
     }
 }
