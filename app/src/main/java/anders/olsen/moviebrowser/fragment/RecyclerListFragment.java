@@ -18,15 +18,11 @@ import anders.olsen.moviebrowser.listener.RecyclerClickListener;
 import anders.olsen.moviebrowser.model.MediaObject;
 
 /**
- * Fragment which show a list of MediaObjects in RecyclerViews.
- * In the fragments onCreateView, an ArrayList with MediaObjects is obtained,
- * with key MEDIA_OBJECT_LIST_KEY.
- *
+ * Abstract class, used for when showing RecyclerViews in a list.
  * @author Anders Engen Olsen
  * @see anders.olsen.moviebrowser.adapter.RecyclerMediaListAdapter
  * @see anders.olsen.moviebrowser.listener.RecyclerClickListener
  */
-
 public abstract class RecyclerListFragment<AnyType> extends Fragment
         implements RecyclerClickListener.OnItemClickListener {
 
