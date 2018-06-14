@@ -21,15 +21,12 @@ import anders.olsen.moviebrowser.model.MediaObject;
 
 
 /**
- * Fragment which show a list of MediaObjects in RecyclerViews.
- * In the fragments onCreateView, an ArrayList with MediaObjects is obtained,
- * with key MEDIA_OBJECT_LIST_KEY.
+ * Fragment which show a list of Strings, presented with RecyclerViews.
  *
  * @author Anders Engen Olsen
- * @see RecyclerMediaListAdapter
+ * @see RecyclerListAdapter
  * @see RecyclerClickListener
  */
-
 public class RecyclerStringListFragment extends RecyclerListFragment<String> {
 
     private FragmentManager manager;
