@@ -8,3 +8,4 @@
 /captures
 .externalNativeBuild
 app/src/main/java/anders/olsen/moviebrowser/config/*
+app/release/*
