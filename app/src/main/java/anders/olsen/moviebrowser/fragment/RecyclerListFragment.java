@@ -20,7 +20,6 @@ import anders.olsen.moviebrowser.model.MediaObject;
 /**
  * Abstract class, used for when showing RecyclerViews in a list.
  * @author Anders Engen Olsen
- * @see anders.olsen.moviebrowser.adapter.RecyclerMediaListAdapter
  * @see anders.olsen.moviebrowser.listener.RecyclerClickListener
  */
 public abstract class RecyclerListFragment<AnyType> extends Fragment
