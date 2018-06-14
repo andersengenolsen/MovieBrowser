@@ -7,4 +7,4 @@
 /build
 /captures
 .externalNativeBuild
-app/src/main/java/anders/anders/movieapp/config/*
+app/src/main/java/anders/olsen/moviebrowser/config/*
