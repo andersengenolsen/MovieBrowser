@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="olsen.anders.movieapp">
+    package="anders.olsen.moviebrowser">
 
     <!-- Internet connection -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -14,13 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.BaseActivity">
+        <activity android:name="anders.olsen.moviebrowser.activities.BaseActivity">
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchActivity" />
         </activity>
 
-        <activity android:name=".activities.MainActivity">
+        <activity android:name="anders.olsen.moviebrowser.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,20 +29,20 @@
         </activity>
 
         <!-- No parent, reachable through several activites -->
-        <activity android:name=".activities.MediaObjectActivity" />
+        <activity android:name="anders.olsen.moviebrowser.activities.MediaObjectActivity" />
 
         <activity
-            android:name=".activities.ListActivity"
-            android:parentActivityName=".activities.MainActivity" />
+            android:name="anders.olsen.moviebrowser.activities.ListActivity"
+            android:parentActivityName="anders.olsen.moviebrowser.activities.MainActivity" />
 
         <activity
-            android:name=".activities.MediaCollectionActivity"
-            android:parentActivityName=".activities.MainActivity"
+            android:name="anders.olsen.moviebrowser.activities.MediaCollectionActivity"
+            android:parentActivityName="anders.olsen.moviebrowser.activities.MainActivity"
             android:configChanges="orientation|screenSize"/>
 
         <!-- No parent, reachable through several activites -->
         <activity
-            android:name=".activities.SearchActivity"
+            android:name="anders.olsen.moviebrowser.activities.SearchActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
