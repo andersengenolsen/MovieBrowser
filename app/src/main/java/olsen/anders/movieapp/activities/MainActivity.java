@@ -140,6 +140,12 @@ public class MainActivity extends BaseActivity
         loadNextPage(1, service);
     }
 
+    /**
+     * Loading next page with data from the api
+     *
+     * @param page    page to load from api
+     * @param service BaseMovieTvService
+     */
     private void loadNextPage(int page, BaseMovieTvService service) {
         final ArrayList<MediaObject> list;
         final RecyclerImageAdapter adapter;
