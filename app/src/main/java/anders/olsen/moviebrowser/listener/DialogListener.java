@@ -5,6 +5,6 @@ package anders.olsen.moviebrowser.listener;
  *
  * @author Anders Engen Olsen
  */
-public interface LoginDialogListener {
+public interface DialogListener {
     void onDialogPositiveClick();
 }

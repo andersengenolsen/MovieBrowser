@@ -45,4 +45,5 @@
     <string name="add_rating">Add rating</string>
     <string name="genres">Genres</string>
     <string name="no_genres">Unable to download genres</string>
+    <string name="similar">SIMILAR</string>
 </resources>

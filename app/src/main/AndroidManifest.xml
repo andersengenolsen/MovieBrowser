@@ -29,7 +29,6 @@
         </activity>
 
         <!-- No parent, reachable through several activites -->
-        <activity android:name="anders.olsen.moviebrowser.activities.MediaObjectActivity" />
 
         <activity
             android:name="anders.olsen.moviebrowser.activities.ListActivity"
@@ -37,8 +36,8 @@
 
         <activity
             android:name="anders.olsen.moviebrowser.activities.MediaCollectionActivity"
-            android:parentActivityName="anders.olsen.moviebrowser.activities.MainActivity"
-            android:configChanges="orientation|screenSize"/>
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName="anders.olsen.moviebrowser.activities.MainActivity" />
 
         <!-- No parent, reachable through several activites -->
         <activity
@@ -52,6 +51,10 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+
+        <activity
+            android:name=".activities.MediaObjectActivity"
+            android:configChanges="orientation|screenSize" />
 
     </application>
 

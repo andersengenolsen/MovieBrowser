@@ -18,7 +18,7 @@ import anders.olsen.moviebrowser.listener.RatingDialogListener;
 /**
  * Dialog shown when a user wants to login to TMDB.
  * Dialog has layout dialog_login.xml
- * Activities must implement LoginDialogListener
+ * Activities must implement DialogListener
  *
  * @author Anders Engen Olsen
  */

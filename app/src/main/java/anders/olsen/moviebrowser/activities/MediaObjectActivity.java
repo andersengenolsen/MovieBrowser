@@ -2,55 +2,60 @@ package anders.olsen.moviebrowser.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 
 import anders.olsen.moviebrowser.R;
+import anders.olsen.moviebrowser.adapter.MainPagerAdapter;
+import anders.olsen.moviebrowser.adapter.RecyclerAdapter;
+import anders.olsen.moviebrowser.fragment.MediaObjectInformationFragment;
 import anders.olsen.moviebrowser.fragment.RatingDialogFragment;
+import anders.olsen.moviebrowser.fragment.RecyclerMediaListFragment;
 import anders.olsen.moviebrowser.fragment.YoutubeFragment;
 import anders.olsen.moviebrowser.interfaces.Saveable;
-import anders.olsen.moviebrowser.listener.RatingDialogListener;
+import anders.olsen.moviebrowser.listener.ListFragmentListener;
+import anders.olsen.moviebrowser.listener.MediaObjectFragmentListener;
 import anders.olsen.moviebrowser.listener.TmdbListener;
 import anders.olsen.moviebrowser.loader.BaseMovieTvService;
 import anders.olsen.moviebrowser.model.MediaObject;
 
 /**
- * Activity containing information about a single MediaObject.
- * The activity can be launched from several other activities, thus no parent.
- * <p>
- * The MediaObject is fetched in the onCreate, by key: BaseActivtiy.MEDIA_OBJECT_KEY
- *
- * @author Anders Engen Olsen
- * @see MediaObject
+ * Media object activity.
+ * Showing information about current media object,
+ * and a list of similar mediaobjects.
+ * 2 tabs, one for information, and one for similar media objects.
  */
-
-public class MediaObjectActivity extends BaseActivity
-        implements View.OnClickListener, RatingDialogListener {
+public class MediaObjectActivity extends BaseActivity implements ListFragmentListener,
+        MediaObjectFragmentListener {
 
     /**
      * Youtube video ID key
      */
     public final static String YOUTUBE_ID = "youtube_id";
+
     /**
-     * MediaObject som vises
+     * Current media object.
      */
     private MediaObject mediaObject;
 
     /**
-     * ImageButton watchlist
+     * Similar mediaobjects.
      */
-    private ImageButton watchlistBtn;
+    private RecyclerMediaListFragment similarTab;
+
     /**
-     * ImageButton favoritelist
+     * Information about current media object
      */
-    private ImageButton favoriteBtn;
+    private MediaObjectInformationFragment mediaTab;
+
+    /**
+     * {@link anders.olsen.moviebrowser.interfaces.Saveable}
+     */
+    private Saveable saveable;
+
     /**
      * Flag, watchlist
      */
@@ -67,39 +72,24 @@ public class MediaObjectActivity extends BaseActivity
      * Key for saved instance state, favoritelist
      */
     private final String FAVORITE_FLAG = "favorite_flag";
-    /**
-     * {@link anders.olsen.moviebrowser.interfaces.Saveable}
-     */
-    private Saveable saveable;
 
-    /**
-     * Handling intent.
-     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Layout
-        addContentView(R.layout.activity_mediaobject);
+        addContentView(R.layout.activity_tablayout);
 
+        // Up navigation, displaying arrow back to previous activity.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (getIntent().getParcelableExtra(BaseActivity.MEDIA_OBJECT_KEY) != null) {
-
             mediaObject = getIntent().getParcelableExtra(BaseActivity.MEDIA_OBJECT_KEY);
-
-            setTitle(mediaObject.getTitle());
-
-            initViews(mediaObject);
         }
 
-        // Restoring button states
-        if (savedInstanceState != null) {
-            inFavoritelist = savedInstanceState.getBoolean(FAVORITE_FLAG);
-            inWatchlist = savedInstanceState.getBoolean(WATCHLIST_FLAG);
-            alternateButtonColor(favoriteBtn, inFavoritelist);
-            alternateButtonColor(watchlistBtn, inWatchlist);
-        }
+        similarTab = new RecyclerMediaListFragment();
+        mediaTab = new MediaObjectInformationFragment();
+        mediaTab.setMediaObject(mediaObject);
+        setUpTabLayout();
 
         if (mediaObject.isMovie())
             saveable = tmdb.getMovieAccountService();
@@ -113,92 +103,14 @@ public class MediaObjectActivity extends BaseActivity
         }
     }
 
-    /**
-     * Implementation of RatingDialogListener
-     * Adding rating to the current mediaobject
-     *
-     * @param rating the rating to add
-     * @see anders.olsen.moviebrowser.loader.AccountService#addRating(MediaObject, int, TmdbListener)
-     */
     @Override
-    public void onDialogPositiveClick(int rating) {
-        accountService.addRating(mediaObject, rating, new TmdbListener<String>() {
-            @Override
-            public void onSuccess(String result) {
-                showToast(result);
-            }
-
-            @Override
-            public void onError(String result) {
-                showToast(result);
-            }
-        });
-    }
-
-    /**
-     * Changing the color of the the button.
-     * DKGRAY indicating the mediaobject is in a list.
-     * BLUE indication the mediaobject is not in a list.
-     * <p>
-     * This method should only be called prior to a successful call to TmdbManager,
-     * as it does not check against the users actual list. It simply switches between two
-     * drawable styles. If the method is called without a successful call to TmdbManager,
-     * it will change the color, regardless of the actual result of the list-operations.
-     *
-     * @param button Button which will change background
-     */
-    private void alternateButtonColor(ImageButton button, boolean inList) {
-        if (inList)
-            button.setBackgroundColor(getColor(R.color.colorChecked));
-        else
-            button.setBackgroundColor(getColor(R.color.colorPrimary));
-    }
-
-    /**
-     * The activity can be started from several parent activities.
-     * Overriding default, returning to previous activity when up pressed.
-     *
-     * @param item
-     * @return boolean
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onScrollEnd(int page, Fragment fragment) {
+        // TODO: Scroll end in listfragment
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(WATCHLIST_FLAG, inWatchlist);
-        outState.putBoolean(FAVORITE_FLAG, inFavoritelist);
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * On click events for views.
-     */
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.add_favorite:
-                addFavorite();
-                break;
-            case R.id.add_watchlist:
-                addWatchlist();
-                break;
-            case R.id.watch_trailer:
-                startTrailer();
-                break;
-            case R.id.add_rating:
-                showRatingDialog();
-                break;
-        }
+    public void onItemClicked(RecyclerAdapter adapter, int position) {
+        // TODO: Item click in list fragment
     }
 
     /**
@@ -208,7 +120,8 @@ public class MediaObjectActivity extends BaseActivity
      *
      * @see #onDialogPositiveClick(int)
      */
-    private void showRatingDialog() {
+    @Override
+    public void showRatingDialog() {
         RatingDialogFragment dialogFragment = new RatingDialogFragment();
         dialogFragment.show(getSupportFragmentManager(), "RatingDialog");
     }
@@ -219,7 +132,8 @@ public class MediaObjectActivity extends BaseActivity
      * @see BaseMovieTvService#getTrailerUrl(int, TmdbListener)
      * @see YoutubeFragment
      */
-    private void startTrailer() {
+    @Override
+    public void startTrailer() {
         BaseMovieTvService service;
         service = (mediaObject.isMovie()) ? movieService : tvService;
 
@@ -253,15 +167,16 @@ public class MediaObjectActivity extends BaseActivity
      * If successful, the color of the button will change
      *
      * @see Saveable#addToFavoriteList(MediaObject, boolean, TmdbListener)
-     * @see #alternateButtonColor(ImageButton, boolean)
+     * @see MediaObjectInformationFragment#alternateFavoritelistBtnColor(boolean)
      */
-    private void addFavorite() {
+    @Override
+    public void addFavorite() {
         saveable.addToFavoriteList(mediaObject, !inFavoritelist,
                 new TmdbListener<String>() {
                     @Override
                     public void onSuccess(String result) {
                         inFavoritelist = !inFavoritelist;
-                        alternateButtonColor(favoriteBtn, inFavoritelist);
+                        mediaTab.alternateFavoritelistBtnColor(inFavoritelist);
                         showToast(result);
                     }
 
@@ -276,16 +191,17 @@ public class MediaObjectActivity extends BaseActivity
      * Adding movie / URL_TV to the users watchlist.
      * If successful, the color of the button will change
      *
-     * @see #alternateButtonColor(ImageButton, boolean)
+     * @see MediaObjectInformationFragment#alternateWatchlistBtnColor(boolean)
      * @see Saveable(MediaObject, boolean, TmdbListener)
      */
-    private void addWatchlist() {
+    @Override
+    public void addWatchlist() {
         saveable.addToWatchlist(mediaObject, !inWatchlist,
                 new TmdbListener<String>() {
                     @Override
                     public void onSuccess(String result) {
                         inWatchlist = !inWatchlist;
-                        alternateButtonColor(watchlistBtn, inWatchlist);
+                        mediaTab.alternateWatchlistBtnColor(inWatchlist);
                         showToast(result);
                     }
 
@@ -294,6 +210,106 @@ public class MediaObjectActivity extends BaseActivity
                         showToast(result);
                     }
                 });
+    }
+
+    /**
+     * Implementation of RatingDialogListener
+     * Adding rating to the current mediaobject
+     *
+     * @param rating the rating to add
+     * @see anders.olsen.moviebrowser.loader.AccountService#addRating(MediaObject, int, TmdbListener)
+     */
+    @Override
+    public void onDialogPositiveClick(int rating) {
+        accountService.addRating(mediaObject, rating, new TmdbListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                showToast(result);
+            }
+
+            @Override
+            public void onError(String result) {
+                showToast(result);
+            }
+        });
+    }
+
+    /**
+     * The activity can be started from several parent activities.
+     * Overriding default, returning to previous activity when up pressed.
+     *
+     * @param item
+     * @return boolean
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Initializing the tab-layout
+     * The tab-layout is used for both movies and URL_TV.
+     * The tabs are: Movies | URL_TV shows
+     * The fragment shown in each tab is RecyclerMediaListFragment.
+     *
+     * @see RecyclerMediaListFragment
+     */
+    private void setUpTabLayout() {
+        // Fetching tab-layout.
+        final TabLayout tabLayout = findViewById(R.id.tablayout);
+
+        // Naming
+        tabLayout.addTab(tabLayout.newTab().setText(mediaObject.getTitle()));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.similar));
+
+        // Whole screen
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
+        // Adapter to administrate the fragments (the tabs).
+        MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager(),
+                mediaTab, similarTab);
+
+        final ViewPager viewPager = findViewById(R.id.pager);
+        viewPager.setAdapter(adapter);
+
+        // Setting EventListeners
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+        // Behaviour when the user clicks on a tab.
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+
+            /**
+             * Setting the correct fragment.
+             *
+             * @param tab chosen tab
+             */
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+
+        });
+    }
+
+    private void loadSimilarFromApi(int page) {
+        // TODO: Load similar movies / TV from the API.
     }
 
     /**
@@ -306,7 +322,7 @@ public class MediaObjectActivity extends BaseActivity
             public void onSuccess(Boolean inList) {
                 inFavoritelist = inList;
                 if (inList)
-                    alternateButtonColor(favoriteBtn, inFavoritelist);
+                    mediaTab.alternateFavoritelistBtnColor(inFavoritelist);
             }
 
             @Override
@@ -319,7 +335,7 @@ public class MediaObjectActivity extends BaseActivity
             public void onSuccess(Boolean inList) {
                 inWatchlist = inList;
                 if (inList)
-                    alternateButtonColor(watchlistBtn, inWatchlist);
+                    mediaTab.alternateWatchlistBtnColor(inWatchlist);
             }
 
             @Override
@@ -327,57 +343,5 @@ public class MediaObjectActivity extends BaseActivity
 
             }
         });
-    }
-
-    /**
-     * Setting up views
-     * Image is loaded with Picasso.
-     *
-     * @param mediaObject MediaObject
-     * @see #setText(TextView, String)
-     */
-    private void initViews(MediaObject mediaObject) {
-        watchlistBtn = findViewById(R.id.add_watchlist);
-        favoriteBtn = findViewById(R.id.add_favorite);
-        watchlistBtn.setOnClickListener(this);
-        favoriteBtn.setOnClickListener(this);
-        findViewById(R.id.watch_trailer).setOnClickListener(this);
-        findViewById(R.id.add_rating).setOnClickListener(this);
-
-        ImageView logoImg = findViewById(R.id.media_image);
-        ImageView bgImg = findViewById(R.id.background);
-
-        RequestCreator creator = Picasso.with(this).load(mediaObject.getImagePath())
-                .error(R.drawable.ic_movie_black)
-                .placeholder(R.drawable.ic_movie_black);
-
-        creator.into(logoImg);
-        creator.into(bgImg);
-
-        TextView genreTxt = findViewById(R.id.genre);
-        TextView releaseTxt = findViewById(R.id.release);
-        TextView ratingTxt = findViewById(R.id.rating);
-        TextView languageTxt = findViewById(R.id.language);
-        TextView handlingTxt = findViewById(R.id.handling);
-
-        setText(genreTxt, mediaObject.getGenre());
-        setText(releaseTxt, mediaObject.getReleaseDate());
-        setText(ratingTxt, mediaObject.getRating());
-        setText(languageTxt, mediaObject.getLanguage());
-        setText(handlingTxt, mediaObject.getHandling());
-    }
-
-    /**
-     * Checking whether a String is null or empty. String containing only whitespace is considered
-     * empty.
-     * If empty or null, string with "unknown" will be placed in TextView.
-     *
-     * @param tv  TextView
-     * @param txt Text to place in textview
-     */
-    private void setText(TextView tv, String txt) {
-        if (txt == null || txt.trim().length() == 0)
-            tv.setText(R.string.unknown);
-        tv.setText(txt);
     }
 }

@@ -11,23 +11,23 @@ import android.view.View;
 import android.widget.Button;
 
 import anders.olsen.moviebrowser.R;
-import anders.olsen.moviebrowser.listener.LoginDialogListener;
+import anders.olsen.moviebrowser.listener.DialogListener;
 
 
 /**
  * Dialog shown when a user wants to login to TMDB.
  * Dialog has layout dialog_login.xml
- * Activities must implement LoginDialogListener
+ * Activities must implement DialogListener
  *
  * @author Anders Engen Olsen
  */
 
 public class LoginDialogFragment extends DialogFragment {
 
-    private LoginDialogListener loginDialogListener;
+    private DialogListener dialogListener;
 
     /**
-     * Activites must implement LoginDialogListener
+     * Activites must implement DialogListener
      *
      * @param savedInstanceState
      */
@@ -36,10 +36,10 @@ public class LoginDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         try {
-            loginDialogListener = (LoginDialogListener) getActivity();
+            dialogListener = (DialogListener) getActivity();
         } catch (ClassCastException err) {
             throw new ClassCastException(getActivity().getClass().getSimpleName()
-                    + " must implement LoginDialogListener!");
+                    + " must implement DialogListener!");
         }
     }
 
@@ -64,7 +64,7 @@ public class LoginDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
 
-                loginDialogListener.onDialogPositiveClick();
+                dialogListener.onDialogPositiveClick();
                 dismiss();
             }
         });

@@ -31,7 +31,7 @@ import java.util.Map;
 import anders.olsen.moviebrowser.R;
 import anders.olsen.moviebrowser.fragment.LoginDialogFragment;
 import anders.olsen.moviebrowser.fragment.RecyclerMediaListFragment;
-import anders.olsen.moviebrowser.listener.LoginDialogListener;
+import anders.olsen.moviebrowser.listener.DialogListener;
 import anders.olsen.moviebrowser.loader.AccountService;
 import anders.olsen.moviebrowser.loader.MovieAccountService;
 import anders.olsen.moviebrowser.loader.MovieService;
@@ -57,7 +57,7 @@ import anders.olsen.moviebrowser.model.MediaObject;
  */
 
 public class BaseActivity extends AppCompatActivity
-        implements LoginDialogListener {
+        implements DialogListener {
     /**
      * Key for media objects with intents
      */
@@ -159,7 +159,7 @@ public class BaseActivity extends AppCompatActivity
      *
      * @see #startBrowser(Uri)
      * @see AccountService#requestToken(TmdbListener)
-     * @see LoginDialogListener
+     * @see DialogListener
      */
     @Override
     public void onDialogPositiveClick() {
