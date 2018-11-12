@@ -88,6 +88,16 @@ public abstract class BaseMovieTvService extends BaseService {
                                     final TmdbListener<ArrayList<MediaObject>> listener);
 
     /**
+     * Returning similar media objects.
+     *
+     * @param id       mediaobject id
+     * @param page     page to load from api
+     * @param listener fired when downloaded
+     */
+    public abstract void getSimilar(int id, int page, final TmdbListener<ArrayList<MediaObject>> listener);
+
+
+    /**
      * Downloading JSON containing genres
      *
      * @param url url with genres

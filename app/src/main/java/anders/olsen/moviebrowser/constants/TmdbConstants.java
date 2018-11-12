@@ -144,4 +144,8 @@ public class TmdbConstants {
      * URL RATING
      */
     public static final String RATING = "rating";
+    /**
+     * Similar media objects
+     */
+    public static final String SIMILAR = "similar";
 }

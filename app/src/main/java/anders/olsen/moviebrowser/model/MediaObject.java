@@ -3,6 +3,9 @@ package anders.olsen.moviebrowser.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * POJO representing a "MediaObject", meaning a Movie or TV shows downloaded from TMDB API.
  * Implementing Parcelable, so that it can be passed with intents.
@@ -103,6 +106,29 @@ public class MediaObject implements Parcelable {
 
     public String getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MediaObject that = (MediaObject) o;
+        return id == that.id &&
+                Objects.equals(title, that.title) &&
+                Objects.equals(releaseDate, that.releaseDate) &&
+                Arrays.equals(genre, that.genre) &&
+                Objects.equals(rating, that.rating) &&
+                Objects.equals(language, that.language) &&
+                Objects.equals(handling, that.handling) &&
+                Objects.equals(imagePath, that.imagePath) &&
+                Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(id, title, releaseDate, rating, language, handling, imagePath, type);
+        result = 31 * result + Arrays.hashCode(genre);
+        return result;
     }
 
     /**

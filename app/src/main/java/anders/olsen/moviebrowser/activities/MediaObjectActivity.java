@@ -6,11 +6,16 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
+import java.util.Stack;
 
 import anders.olsen.moviebrowser.R;
 import anders.olsen.moviebrowser.adapter.MainPagerAdapter;
 import anders.olsen.moviebrowser.adapter.RecyclerAdapter;
+import anders.olsen.moviebrowser.adapter.RecyclerMediaListAdapter;
 import anders.olsen.moviebrowser.fragment.MediaObjectInformationFragment;
 import anders.olsen.moviebrowser.fragment.RatingDialogFragment;
 import anders.olsen.moviebrowser.fragment.RecyclerMediaListFragment;
@@ -64,14 +69,16 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
      * Flag, favoritelist
      */
     private boolean inFavoritelist;
+
     /**
-     * Key for saved instance state, watchlist
+     * Stack of chosen mediaobjects, avoiding multiple activities.
      */
-    private final String WATCHLIST_FLAG = "watchlist_flag";
+    private Stack<MediaObject> mediaObjectStack;
+
     /**
-     * Key for saved instance state, favoritelist
+     * Tab Layout
      */
-    private final String FAVORITE_FLAG = "favorite_flag";
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,17 +86,61 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
 
         addContentView(R.layout.activity_tablayout);
 
+        mediaObjectStack = new Stack<>();
+
         // Up navigation, displaying arrow back to previous activity.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (getIntent().getParcelableExtra(BaseActivity.MEDIA_OBJECT_KEY) != null) {
             mediaObject = getIntent().getParcelableExtra(BaseActivity.MEDIA_OBJECT_KEY);
+            mediaObjectStack.push(mediaObject);
         }
+
+        loadNewMediaobject();
+    }
+
+    /**
+     * Loading more similar movies.
+     *
+     * @param page
+     * @param fragment
+     */
+    @Override
+    public void onScrollEnd(int page, Fragment fragment) {
+        loadSimilarFromApi(++page);
+    }
+
+    /**
+     * Showing information about a new media object on click.
+     * Previous one stored in stack, shown on back pressed.
+     *
+     * @param adapter
+     * @param position
+     */
+    @Override
+    public void onItemClicked(RecyclerAdapter adapter, int position) {
+        // Fetching chosen media object
+        RecyclerMediaListAdapter rAdapter = (RecyclerMediaListAdapter) adapter;
+        MediaObject mediaObject = rAdapter.getElement(position);
+
+        // Pushing it to the stack, if not equal to the current one
+        if (!mediaObject.equals(mediaObjectStack.peek()))
+            mediaObjectStack.push(mediaObject);
+
+        // Reloading with new media object.
+        loadNewMediaobject();
+    }
+
+    /**
+     * Loading information about chosen mediaobject.
+     */
+    private void loadNewMediaobject() {
+        this.mediaObject = mediaObjectStack.peek();
 
         similarTab = new RecyclerMediaListFragment();
         mediaTab = new MediaObjectInformationFragment();
         mediaTab.setMediaObject(mediaObject);
-        setUpTabLayout();
+        loadSimilarFromApi(1);
 
         if (mediaObject.isMovie())
             saveable = tmdb.getMovieAccountService();
@@ -101,16 +152,8 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
         if (accountService.isLoggedIn()) {
             fetchLists();
         }
-    }
 
-    @Override
-    public void onScrollEnd(int page, Fragment fragment) {
-        // TODO: Scroll end in listfragment
-    }
-
-    @Override
-    public void onItemClicked(RecyclerAdapter adapter, int position) {
-        // TODO: Item click in list fragment
+        setUpTabLayout();
     }
 
     /**
@@ -254,6 +297,19 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
     }
 
     /**
+     * Popping from the media object stack. If it is empty, default behaviour.
+     */
+    @Override
+    public void onBackPressed() {
+        if (mediaObjectStack.size() == 1)
+            super.onBackPressed();
+        else {
+            mediaObjectStack.pop();
+            loadNewMediaobject();
+        }
+    }
+
+    /**
      * Initializing the tab-layout
      * The tab-layout is used for both movies and URL_TV.
      * The tabs are: Movies | URL_TV shows
@@ -262,8 +318,11 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
      * @see RecyclerMediaListFragment
      */
     private void setUpTabLayout() {
+        if (tabLayout != null)
+            tabLayout.removeAllTabs();
+
         // Fetching tab-layout.
-        final TabLayout tabLayout = findViewById(R.id.tablayout);
+        tabLayout = findViewById(R.id.tablayout);
 
         // Naming
         tabLayout.addTab(tabLayout.newTab().setText(mediaObject.getTitle()));
@@ -308,8 +367,27 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
         });
     }
 
+    /**
+     * Loading similar movies / tv from the api.
+     *
+     * @param page pagination
+     */
     private void loadSimilarFromApi(int page) {
-        // TODO: Load similar movies / TV from the API.
+        BaseMovieTvService service;
+        service = (mediaObject.isMovie()) ? movieService : tvService;
+
+        service.getSimilar(mediaObject.getId(),
+                page, new TmdbListener<ArrayList<MediaObject>>() {
+                    @Override
+                    public void onSuccess(ArrayList<MediaObject> result) {
+                        similarTab.appendContent(result);
+                    }
+
+                    @Override
+                    public void onError(String result) {
+                        showToast(result);
+                    }
+                });
     }
 
     /**

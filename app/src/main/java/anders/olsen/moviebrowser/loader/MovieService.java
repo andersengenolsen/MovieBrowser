@@ -18,6 +18,7 @@ import static anders.olsen.moviebrowser.constants.TmdbConstants.PARAM_PAGE;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.PARAM_SORT_BY;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.PARAM_WITH_GENRES;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.POPULARITY_DESC;
+import static anders.olsen.moviebrowser.constants.TmdbConstants.SIMILAR;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.URL_DISCOVER;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.URL_GENRE;
 import static anders.olsen.moviebrowser.constants.TmdbConstants.URL_LIST;
@@ -69,6 +70,22 @@ public class MovieService extends BaseMovieTvService {
     @Override
     public void getTopRated(int page, final TmdbListener<ArrayList<MediaObject>> listener) {
         Uri uri = Uri.parse(API_BASE_URL + URL_MOVIE + URL_TOP_RATED).buildUpon()
+                .appendQueryParameter(PARAM_API_KEY, apiKey)
+                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
+                .build();
+
+        fetchMediaObjects(uri.toString(), listener, MEDIA_TYPE_MOVIE);
+    }
+
+    /**
+     * Returning similar media objects.
+     *
+     * @param page     page to load from api
+     * @param listener fired when downloaded
+     */
+    @Override
+    public void getSimilar(int id, int page, TmdbListener<ArrayList<MediaObject>> listener) {
+        Uri uri = Uri.parse(API_BASE_URL + URL_MOVIE + id + "/" + SIMILAR).buildUpon()
                 .appendQueryParameter(PARAM_API_KEY, apiKey)
                 .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
                 .build();

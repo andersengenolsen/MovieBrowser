@@ -20,7 +20,6 @@ public class RecyclerClickListener implements RecyclerView.OnItemTouchListener {
      */
     public interface OnItemClickListener {
         void onItemClick(RecyclerAdapter adapter, int position);
-
     }
 
     private OnItemClickListener listener;
