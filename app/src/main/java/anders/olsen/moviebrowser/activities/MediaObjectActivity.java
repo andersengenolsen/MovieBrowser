@@ -6,7 +6,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
@@ -129,31 +128,6 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
 
         // Reloading with new media object.
         loadNewMediaobject();
-    }
-
-    /**
-     * Loading information about chosen mediaobject.
-     */
-    private void loadNewMediaobject() {
-        this.mediaObject = mediaObjectStack.peek();
-
-        similarTab = new RecyclerMediaListFragment();
-        mediaTab = new MediaObjectInformationFragment();
-        mediaTab.setMediaObject(mediaObject);
-        loadSimilarFromApi(1);
-
-        if (mediaObject.isMovie())
-            saveable = tmdb.getMovieAccountService();
-        else
-            saveable = tmdb.getTvAccountService();
-
-        // Changing color of watchlist and favorite button.
-        // Green indicating that it is saved in list.
-        if (accountService.isLoggedIn()) {
-            fetchLists();
-        }
-
-        setUpTabLayout();
     }
 
     /**
@@ -286,10 +260,9 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                super.onBackPressed();
                 return true;
         }
 
@@ -422,4 +395,30 @@ public class MediaObjectActivity extends BaseActivity implements ListFragmentLis
             }
         });
     }
+
+    /**
+     * Loading information about chosen mediaobject.
+     */
+    private void loadNewMediaobject() {
+        this.mediaObject = mediaObjectStack.peek();
+
+        similarTab = new RecyclerMediaListFragment();
+        mediaTab = new MediaObjectInformationFragment();
+        mediaTab.setMediaObject(mediaObject);
+        loadSimilarFromApi(1);
+
+        if (mediaObject.isMovie())
+            saveable = tmdb.getMovieAccountService();
+        else
+            saveable = tmdb.getTvAccountService();
+
+        // Changing color of watchlist and favorite button.
+        // Green indicating that it is saved in list.
+        if (accountService.isLoggedIn()) {
+            fetchLists();
+        }
+
+        setUpTabLayout();
+    }
+
 }
